@@ -278,7 +278,7 @@ class TestDatastoreServer(unittest.TestCase):
     putreq_pb.mutable_entity(1).MergeFrom(entity_proto2)
     
     putresp_pb = datastore_pb.PutResponse()
-    dd.dynamic_put('test', putreq_pb, putresp_pb)
+    dd.dynamic_put('apichecker', putreq_pb, putresp_pb)
     self.assertEquals(len(putresp_pb.key_list()), 2)
 
   def test_put_entities(self):
@@ -474,13 +474,13 @@ class TestDatastoreServer(unittest.TestCase):
     key.MergeFrom(entity_key)
     get_resp = datastore_pb.GetResponse()
     
-    dd.dynamic_get("test", get_req, get_resp)     
+    dd.dynamic_get("apichecker", get_req, get_resp)     
     self.assertEquals(get_resp.entity_size(), 1)
 
     # Now test while in a transaction
     get_resp = datastore_pb.GetResponse()
     get_req.mutable_transaction().set_handle(1)
-    dd.dynamic_get("test", get_req, get_resp)     
+    dd.dynamic_get("apichecker", get_req, get_resp)     
     self.assertEquals(get_resp.entity_size(), 1)
 
   def test_ancestor_query(self):
@@ -558,7 +558,7 @@ class TestDatastoreServer(unittest.TestCase):
     del_request.should_receive("has_transaction").never()
     del_request.should_receive("transaction").never()
     dd = DatastoreDistributed(None, None)
-    dd.dynamic_delete("appid", del_request)
+    dd.dynamic_delete("apichecker", del_request)
 
     del_request = flexmock()
     del_request.should_receive("key_list").and_return(['1'])
@@ -570,7 +570,7 @@ class TestDatastoreServer(unittest.TestCase):
     flexmock(dd).should_receive("acquire_locks_for_trans").and_return({})
     flexmock(dd).should_receive("release_locks_for_nontrans").never()
     flexmock(dd).should_receive("delete_entities").once()
-    dd.dynamic_delete("appid", del_request)
+    dd.dynamic_delete("apichecker", del_request)
 
     del_request = flexmock()
     del_request.should_receive("key_list").and_return(['1'])
@@ -580,7 +580,7 @@ class TestDatastoreServer(unittest.TestCase):
     flexmock(dd).should_receive("acquire_locks_for_nontrans").once().and_return({})
     flexmock(dd).should_receive("delete_entities").once()
     flexmock(dd).should_receive("release_locks_for_nontrans").once()
-    dd.dynamic_delete("appid", del_request)
+    dd.dynamic_delete("apichecker", del_request)
 
   def test_reverse_path(self):
     zookeeper = flexmock()

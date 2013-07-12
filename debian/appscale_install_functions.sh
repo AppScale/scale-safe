@@ -16,9 +16,6 @@ if [ -z "$APPSCALE_PACKAGE_MIRROR" ]; then
     export APPSCALE_PACKAGE_MIRROR=http://s3.amazonaws.com/appscale-build
 fi
 
-#if [ -z "$APPSCALE_HOME" ]; then
- #  export APPSCALE_HOME= /root/appscale/
-#fi 
 export APPSCALE_VERSION=1.8.0
 
 increaseconnections()
@@ -135,20 +132,11 @@ EOF
 
 updatealternatives()
 {
-# we don't need to set for sh
-#update-alternatives --install /bin/sh sh /bin/dash 1
-#update-alternatives --install /bin/sh sh /bin/bash 1
-#update-alternatives --set sh /bin/bash
 	:;
 }
 
 installappscaleprofile()
 {
-#    mkdir -p ${APPSCALE_HOME}
-#    cat > ${APPSCALE_HOME}/appscale.env <<EOF
-#export APPSCALE_HOME=${APPSCALE_HOME_RUNTIME}
-#export HOME=\$APPSCALE_HOME
-#EOF
     DESTFILE=${DESTDIR}/etc/profile.d/appscale.sh
     mkdir -pv $(dirname $DESTFILE)
     echo "Generating $DESTFILE"
@@ -719,42 +707,39 @@ postinstallcassandra()
 
 installprotobuf_fromsource()
 {
-    PROTOBUF_VER=2.3.0
-    # install protobuf 2.3.0. we need egg version for python.
+    PROTOBUF_VER=2.5.0
+    # install protobuf 2.5.0. we need egg version for python.
+    # Version 2.5.0 or greater is required for Google Cloud Datastore.
+
     mkdir -pv ${APPSCALE_HOME}/downloads
     cd ${APPSCALE_HOME}/downloads
-    wget $APPSCALE_PACKAGE_MIRROR/protobuf-${PROTOBUF_VER}.tar.gz
+    wget ${APPSCALE_PACKAGE_MIRROR}/protobuf-${PROTOBUF_VER}.tar.gz
     tar zxvf protobuf-${PROTOBUF_VER}.tar.gz
     rm -v protobuf-${PROTOBUF_VER}.tar.gz
-    pushd protobuf-${PROTOBUF_VER}
+    cd protobuf-${PROTOBUF_VER}
     ./configure --prefix=/usr
-    make
-    make check
+    #make
+    #make check
     make install
-    pushd python
+    cd python
 # protobuf could not be installed in the different root
 #    python setup.py install --prefix=${DESTDIR}/usr
-    python setup.py bdist_egg
+    #python setup.py bdist_egg
+    python setup.py build
+    python setup.py install
 # copy the egg file
-    DISTP=${DESTDIR}/usr/local/lib/python2.6/dist-packages
-    mkdir -pv ${DISTP}
-    cp -v dist/protobuf-*.egg ${DISTP}
-    popd
-    popd
+    #DISTP=${DESTDIR}/usr/local/lib/python2.6/dist-packages
+    #mkdir -pv ${DISTP}
+    #cp -v dist/protobuf-*.egg ${DISTP}
+    cd ..
+    cd ..
     rm -rv protobuf-${PROTOBUF_VER}
 }
 
-installprotobuf()
+installgoogleclouddatastore()
 {
-# make protobuf module loadable
-# this is not needed when we use egg to install protobuf.
-    mkdir -pv ${APPSCALE_HOME}/AppServer/google
-    # this should be absolute path of runtime.
-    ln -sfv /var/lib/python-support/python2.6/google/protobuf ${APPSCALE_HOME}/AppServer/google/
-}
-
-postinstallprotobuf()
-{
+    pip install pyopenssl
+    pip install googledatastore
     :;
 }
 
@@ -985,6 +970,20 @@ installcelery()
 {
   easy_install -U Celery
   easy_install -U Flower
+}
+
+installsimplejson()
+{
+  SIMPLE_JSON_VERSION=2.5.0
+  wget ${APPSCALE_PACKAGE_MIRROR}/simplejson-${SIMPLE_JSON_VERSION}.tar.gz
+  mkdir -pv ${APPSCALE_HOME}/downloads
+  cd ${APPSCALE_HOME}/downloads
+  tar zxvf simplejson-${SIMPLE_JSON_VERSION}.tar.gz
+  cd simplejson-${SIMPLE_JSON_VERSION}
+  python setup.py install  
+  cd ..
+  rm -fdr simplejson-${SIMPLE_JSON_VERSION}.tar.gz
+  rm -fdr simplejson-${SIMPLE_JSON_VERSION}
 }
 
 installrabbitmq()

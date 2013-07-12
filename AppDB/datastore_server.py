@@ -23,6 +23,7 @@ import appscale_datastore_batch
 import dbconstants
 import groomer
 import helper_functions
+import pb_mapper
 
 from zkappscale import zktransaction as zk
 from zkappscale.zktransaction import ZKInternalException
@@ -111,6 +112,9 @@ class DatastoreDistributed():
 
   # The key we use to lock for allocating new IDs
   _ALLOCATE_ROOT_KEY = "__allocate__"
+
+  # Reserved application identifiers which are AppScale internal applications.
+  _RESERVED_APP_IDS = ["apichecker", "appscaledashboard"]
 
   def __init__(self, datastore_batch, zookeeper=None):
     """
@@ -694,6 +698,13 @@ class DatastoreDistributed():
     Raises:
       ZKTransactionException: If we are unable to acquire/release ZooKeeper locks.
     """
+    if app_id not in self._RESERVED_APP_IDS:
+      mapper = pb_mapper.PbMapper(app_id=app_id, dataset=app_id)
+      req = mapper.convert_blind_put_request(put_request)
+      response = mapper.send_blind_write(req)
+      mapper.convert_blind_put_response(put_request, response, put_response)
+      return
+
     entities = put_request.entity_list()
     for entity in entities:
       self.validate_key(entity.key())
@@ -1115,6 +1126,13 @@ class DatastoreDistributed():
     Raises:
       ZKTransactionException: If a lock was unable to get acquired.
     """ 
+    if app_id not in self._RESERVED_APP_IDS:
+      mapper = pb_mapper.PbMapper(app_id=app_id, dataset=app_id)
+      req = mapper.convert_get_request(get_request)
+      response = mapper.send_lookup(req)
+      mapper.convert_get_response(response, get_response)
+      return get_response
+
     keys = get_request.key_list()
     txnid = 0
     if get_request.has_transaction():
@@ -1143,6 +1161,12 @@ class DatastoreDistributed():
       app_id: The application ID.
       delete_request: Request with a list of keys.
     """
+    if app_id not in self._RESERVED_APP_IDS:
+      mapper = pb_mapper.PbMapper(app_id=app_id, dataset=app_id)
+      gcd_delete = mapper.convert_delete_request_to_blind_write(delete_request)
+      response = mapper.send_blind_write(gcd_delete)
+      return
+
     txn_hash = {}
     keys = delete_request.key_list()
     if not keys:
@@ -1958,7 +1982,8 @@ class DatastoreDistributed():
     property_name, property_names = set_prop_names(filter_info)
    
     if len(property_names) <= 1:
-      if not (len(property_names) == 1 and (query.has_ancestor() or query.has_kind())):
+      if not (len(property_names) == 1 and (query.has_ancestor() or \
+        query.has_kind())):
         return None
 
     if not property_name:
@@ -2017,7 +2042,8 @@ class DatastoreDistributed():
       for ent in ent_res:
         e = entity_pb.EntityProto(ent)
 
-        filtered = self.__filter_kinds_and_ancestors(query, e, ent, filtered_entities)
+        filtered = self.__filter_kinds_and_ancestors(query, e, ent, 
+          filtered_entities)
         if filtered:
           continue
         prop_list = e.property_list()
@@ -2063,7 +2089,8 @@ class DatastoreDistributed():
           A boolean of whether the specific entity was filtered or not. 
     """
     # Filter out kind if it does not match.
-    if query.has_kind() and query.kind() != e.key().path().element_list()[-1].type():
+    if query.has_kind() and query.kind() != e.key().path().\
+      element_list()[-1].type():
       filtered_entities.remove(ent)
       return True
 
@@ -2212,6 +2239,13 @@ class DatastoreDistributed():
       query: The query to run.
       query_result: The response given to the application server.
     """
+    if query.app() not in self._RESERVED_APP_IDS:
+      mapper = pb_mapper.PbMapper(app_id=query.app(), dataset=query.app())
+      req = mapper.convert_query_request(query)
+      response = mapper.send_query(req)
+      mapper.convert_query_response(response, query_result)
+      return
+
     result = self.__get_query_results(query)
     count = 0
     offset = query.offset()

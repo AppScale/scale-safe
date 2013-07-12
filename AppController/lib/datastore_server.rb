@@ -39,6 +39,12 @@ module DatastoreServer
   # datastore servers to this value.
   DEFAULT_NUM_SERVERS = 3
 
+  # Google service account for Google Cloud Datastore.
+  SERVICE_ACCOUNT = "399068749927-11atpdlu60fv73ip8jnhvftr3kt7kd8l@developer.gserviceaccount.com"
+
+  # Google private key for Google Cloud Datastore.
+  PRIVATE_KEY_FILE = "/root/2574a2a5f891af1afb67c13de3be28648a46833f-privatekey.p12"
+
   # Starts a Datastore Server on this machine. We don't want to monitor
   # it ourselves, so just tell god to start it and watch it.
   def self.start(master_ip, db_local_ip, my_ip, table, zklocations)
@@ -48,7 +54,9 @@ module DatastoreServer
     env_vars = { 
       'APPSCALE_HOME' => APPSCALE_HOME,
       "MASTER_IP" => master_ip, 
-      "LOCAL_DB_IP" => db_local_ip 
+      "LOCAL_DB_IP" => db_local_ip,
+      "DATASTORE_SERVICE_ACCOUNT" => SERVICE_ACCOUNT,
+      "DATASTORE_PRIVATE_KEY_FILE" => PRIVATE_KEY_FILE
     }
   
     ports.each { |port|
