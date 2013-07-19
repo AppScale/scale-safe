@@ -718,19 +718,10 @@ installprotobuf_fromsource()
     rm -v protobuf-${PROTOBUF_VER}.tar.gz
     cd protobuf-${PROTOBUF_VER}
     ./configure --prefix=/usr
-    #make
-    #make check
     make install
     cd python
-# protobuf could not be installed in the different root
-#    python setup.py install --prefix=${DESTDIR}/usr
-    #python setup.py bdist_egg
     python setup.py build
     python setup.py install
-# copy the egg file
-    #DISTP=${DESTDIR}/usr/local/lib/python2.6/dist-packages
-    #mkdir -pv ${DISTP}
-    #cp -v dist/protobuf-*.egg ${DISTP}
     cd ..
     cd ..
     rm -rv protobuf-${PROTOBUF_VER}
