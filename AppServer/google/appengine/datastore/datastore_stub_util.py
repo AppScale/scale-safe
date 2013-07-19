@@ -796,6 +796,8 @@ class ListCursor(BaseCursor):
       (cursor_entity, inclusive): a datastore_pb.EntityProto and if it should
       be included in the result set.
     """
+    # In order for Google Cloud Datastore to store its cursor and have 
+    # backward compatibility, we remove this check.
     #assert len(compiled_cursor.position_list()) == 1
 
     position = compiled_cursor.position(0)
