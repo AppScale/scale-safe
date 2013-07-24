@@ -19,6 +19,7 @@ case "$1" in
 	installgems
 	postinstallgems
         installsetuptools
+        installsimplejson
 	installhaproxy
 	postinstallhaproxy
 	installnginx
@@ -39,8 +40,7 @@ case "$1" in
 	postinstallthrift_fromsource
         installtornado
         postinstalltornado
-	installprotobuf
-	postinstallprotobuf
+        installprotobuf_fromsource
         installflexmock
         installnose
 	installhadoop
@@ -70,6 +70,9 @@ case "$1" in
 	installhypertable
 	postinstallhypertable
 	;;
+    googleclouddatastore)
+        installgoogleclouddatastore
+        ;;
     # for test only. this should be included in core and all.
     zookeeper)
 	installzookeeper
@@ -81,7 +84,6 @@ case "$1" in
 	;;
     protobuf-src)
 	installprotobuf_fromsource
-	postinstallprotobuf
 	;;
     rabbit-mq)
         installrabbitmq
@@ -97,6 +99,7 @@ case "$1" in
 	installgems
 	postinstallgems
         installsetuptools
+        installsimplejson
 	installhaproxy
 	postinstallhaproxy
 	installnginx
@@ -119,8 +122,6 @@ case "$1" in
         installflexmock
         installnose
         postinstalltornado
-	installprotobuf
-	postinstallprotobuf
 	installhadoop
 	postinstallhadoop
 	installzookeeper
@@ -133,6 +134,7 @@ case "$1" in
 	postinstallhypertable
         installrabbitmq
         postinstallrabbitmq
+        installgoogleclouddatastore
         installcelery
 	installservice
 	postinstallservice
