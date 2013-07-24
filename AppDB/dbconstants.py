@@ -6,6 +6,10 @@ SECRET_LOCATION = "/etc/appscale/secret.key"
 
 ERROR_DEFAULT = "DB_ERROR:"
 NONEXISTANT_TRANSACTION = "0"
+<<<<<<< HEAD
+=======
+KEY_DELIMITER = '\x00'
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
 
 # Table names
 USERS_TABLE = "USERS__"

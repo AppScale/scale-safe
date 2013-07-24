@@ -3850,11 +3850,16 @@ HOSTS
             Djinn.log_info("Requesting that additional AppServers be added " +
               "to service #{app_name}")
             ZKInterface.request_scale_up_for_app(app_name, my_node.private_ip)
+<<<<<<< HEAD
           else
             Djinn.log_info("Not requesting that additional AppServers be " +
               "added to service #{app_name}")
           end
           return
+=======
+            return
+          end
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
         end
 
         case scaling_decision
@@ -3992,8 +3997,13 @@ HOSTS
       end
     }
 
+<<<<<<< HEAD
     if time_requests_were_seen.zero? or total_requests_seen.zero?
       Djinn.log_debug("Didn't see any request data")
+=======
+    if time_requests_were_seen.zero?
+      Djinn.log_warn("Didn't see any request data - not sure whether to scale up or down.")
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
       return :no_change
     else
       Djinn.log_debug("Did see request data. Total requests seen now is " +
@@ -4036,7 +4046,11 @@ HOSTS
 
   def try_to_scale_up(app_name)
     time_since_last_decision = Time.now.to_i - @last_decision[app_name]
+<<<<<<< HEAD
     if @app_info_map[app_name].nil?
+=======
+    if @app_info_map[app_name].nil? or @app_info_map[app_name]['appengine'].nil?
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
       Djinn.log_info("Not scaling up app #{app_name}, since we aren't " +
         "hosting it anymore.")
       return
@@ -4045,7 +4059,10 @@ HOSTS
     appservers_running = @app_info_map[app_name]['appengine'].length
           
     if time_since_last_decision > SCALEUP_TIME_THRESHOLD and 
+<<<<<<< HEAD
       !@app_info_map[app_name]['appengine'].nil? and
+=======
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
       appservers_running < MAX_APPSERVERS_ON_THIS_NODE
 
       Djinn.log_info("Adding a new AppServer on this node for #{app_name}")
@@ -4065,7 +4082,11 @@ HOSTS
 
   def try_to_scale_down(app_name)
     time_since_last_decision = Time.now.to_i - @last_decision[app_name]
+<<<<<<< HEAD
     if @app_info_map[app_name].nil?
+=======
+    if @app_info_map[app_name].nil? or @app_info_map[app_name]['appengine'].nil?
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
       Djinn.log_debug("Not scaling down app #{app_name}, since we aren't " +
         "hosting it anymore.")
       return
@@ -4074,7 +4095,10 @@ HOSTS
     appservers_running = @app_info_map[app_name]['appengine'].length
 
     if time_since_last_decision > SCALEDOWN_TIME_THRESHOLD and
+<<<<<<< HEAD
       !@app_info_map[app_name]['appengine'].nil? and
+=======
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
       appservers_running > MIN_APPSERVERS_ON_THIS_NODE
 
       Djinn.log_info("Removing an AppServer on this node for #{app_name}")
@@ -4336,12 +4360,20 @@ HOSTS
   def examine_scale_down_requests(all_scaling_votes)
     # First, only scale down in cloud environments.
     if !is_cloud?
+<<<<<<< HEAD
       Djinn.log_info("Not scaling down, because we aren't in a cloud.")
+=======
+      Djinn.log_info("Not scaling down VMs, because we aren't in a cloud.")
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
       return 0
     end
 
     if @nodes.length <= Integer(@creds['min_images'])
+<<<<<<< HEAD
       Djinn.log_info("Not scaling down right now, as we are at the " +
+=======
+      Djinn.log_info("Not scaling down VMs right now, as we are at the " +
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
         "minimum number of nodes the user wants to use.")
       return 0
     end
@@ -4350,7 +4382,11 @@ HOSTS
     @apps_loaded.each { |appid|
       scale_ups = all_scaling_votes[appid].select { |vote| vote == "scale_up" }
       if scale_ups.length > 0
+<<<<<<< HEAD
         Djinn.log_info("Not scaling down, because app #{appid} wants to scale" +
+=======
+        Djinn.log_info("Not scaling down VMs, because app #{appid} wants to scale" +
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
           " up.")
         return 0
       end
@@ -4363,20 +4399,32 @@ HOSTS
       scale_downs = all_scaling_votes[appid].select { |vote| vote == "scale_down" }
       if scale_downs.length > 1
         Djinn.log_info("Got #{scale_downs.length} votes to scale down app " +
+<<<<<<< HEAD
           "#{appid}, so considering removing nodes.")
+=======
+          "#{appid}, so considering removing VMs.")
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
         scale_down_threshold_reached = true
       end
     }
 
     if !scale_down_threshold_reached
+<<<<<<< HEAD
       Djinn.log_info("Not scaling down right now, as not enough nodes have " +
+=======
+      Djinn.log_info("Not scaling down VMs right now, as not enough nodes have " +
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
         "requested it.")
       return 0
     end
 
     # Also, don't scale down if we just scaled up or down.
     if Time.now - @last_scaling_time > SCALEDOWN_TIME_THRESHOLD
+<<<<<<< HEAD
       Djinn.log_info("Not scaling down right now, as we recently scaled " +
+=======
+      Djinn.log_info("Not scaling down VMs right now, as we recently scaled " +
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
         "up or down.")
       return 0
     end

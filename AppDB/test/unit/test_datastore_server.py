@@ -50,22 +50,38 @@ class TestDatastoreServer(unittest.TestCase):
     dd = DatastoreDistributed(None, None)
     item = Item(name="Dyan", _app="hello")
     key = db.model_to_protobuf(item)
+<<<<<<< HEAD
     self.assertEquals(dd.get_kind_key("howdy", key.key().path()), "howdy/Item!Item:0000000000!")
 
     item1 = Item(key_name="Bob", name="Bob", _app="hello")
     key = db.model_to_protobuf(item1)
     self.assertEquals(dd.get_kind_key("howdy", key.key().path()), "howdy/Item!Item:Bob!")
+=======
+    self.assertEquals(dd.get_kind_key("howdy", key.key().path()), "howdy\x00Item!Item:0000000000!")
+
+    item1 = Item(key_name="Bob", name="Bob", _app="hello")
+    key = db.model_to_protobuf(item1)
+    self.assertEquals(dd.get_kind_key("howdy", key.key().path()), "howdy\x00Item!Item:Bob!")
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
    
     item2 = Item(key_name="Frank", name="Frank", _app="hello", parent = item1)
     key = db.model_to_protobuf(item2)
     self.assertEquals(dd.get_kind_key("howdy", key.key().path()),
+<<<<<<< HEAD
            "howdy/Item!Item:Bob!Item:Frank!")
+=======
+           "howdy\x00Item!Item:Bob!Item:Frank!")
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
 
   def test_get_entity_key(self):
     dd = DatastoreDistributed(None, None)
     item = Item(key_name="Bob", name="Bob", _app="hello")
     key = db.model_to_protobuf(item)
+<<<<<<< HEAD
     self.assertEquals(str(dd.get_entity_key("howdy", key.key().path())), "howdy/Item:Bob!")
+=======
+    self.assertEquals(str(dd.get_entity_key("howdy", key.key().path())), "howdy\x00Item:Bob!")
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
 
   def test_validate_key(self):
     dd = DatastoreDistributed(None, None)
@@ -75,7 +91,11 @@ class TestDatastoreServer(unittest.TestCase):
 
   def test_get_index_key(self):
     dd = DatastoreDistributed(None, None)
+<<<<<<< HEAD
     dd.get_index_key("a","b","c","d")  == "a/b/c/d"
+=======
+    dd.get_index_key("a","b","c","d")  == "a\x00b\x00c\x00d"
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
 
   def test_get_table_prefix(self):
     db_batch = flexmock()
@@ -86,12 +106,20 @@ class TestDatastoreServer(unittest.TestCase):
     dd = DatastoreDistributed(db_batch, zookeeper)
     item = Item(key_name="Bob", name="Bob", _app="hello")
     key = db.model_to_protobuf(item)
+<<<<<<< HEAD
     self.assertEquals(dd.get_table_prefix(key), "hello/")
+=======
+    self.assertEquals(dd.get_table_prefix(key), "hello\x00")
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
 
   def test_get_index_key_from_params(self):
     dd = DatastoreDistributed(None, None)
     params = ['a','b','c','d','e']
+<<<<<<< HEAD
     self.assertEquals(dd.get_index_key_from_params(params), "a/b/c/d/e")
+=======
+    self.assertEquals(dd.get_index_key_from_params(params), "a\x00b\x00c\x00d\x00e")
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
 
   def test_get_index_kv_from_tuple(self):
     dd = DatastoreDistributed(None, None)
@@ -99,10 +127,17 @@ class TestDatastoreServer(unittest.TestCase):
     item2 = Item(key_name="Sally", name="Sally", _app="hello")
     key1 = db.model_to_protobuf(item1)
     key2 = db.model_to_protobuf(item2)
+<<<<<<< HEAD
     tuples_list = [("a/b",key1),("a/b",key2)]
     self.assertEquals(dd.get_index_kv_from_tuple(
       tuples_list), (['a/b/Item/name/Bob\x00/Item:Bob!', 'a/b/Item:Bob!'], 
       ['a/b/Item/name/Sally\x00/Item:Sally!', 'a/b/Item:Sally!']))
+=======
+    tuples_list = [("a\x00b",key1),("a\x00b",key2)]
+    self.assertEquals(dd.get_index_kv_from_tuple(
+      tuples_list), (['a\x00b\x00Item\x00name\x00\x9aBob\x00\x00Item:Bob!', 'a\x00b\x00Item:Bob!'], 
+      ['a\x00b\x00Item\x00name\x00\x9aSally\x00\x00Item:Sally!', 'a\x00b\x00Item:Sally!']))
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
 
   def test_delete_index_entries(self):
     db_batch = flexmock()
@@ -123,7 +158,11 @@ class TestDatastoreServer(unittest.TestCase):
     item2 = Item(key_name="Sally", name="Sally", _app="hello")
     key1 = db.model_to_protobuf(item1)
     key2 = db.model_to_protobuf(item2)
+<<<<<<< HEAD
     dd.insert_entities([key1,key2], {"hello//Item:Sally!": 1, "hello//Item:Bob!":1})
+=======
+    dd.insert_entities([key1,key2], {"hello\x00\x00Item:Sally!": 1, "hello\x00\x00Item:Bob!":1})
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
 
   def test_insert_index_entries(self):
     db_batch = flexmock()
@@ -186,9 +225,15 @@ class TestDatastoreServer(unittest.TestCase):
     db_batch = flexmock()
     db_batch.should_receive("batch_delete").and_return(None)
     db_batch.should_receive("batch_put_entity").and_return(None)
+<<<<<<< HEAD
     db_batch.should_receive("batch_get_entity").and_return({'test/blah/test_kind:bob!':
                 {APP_ENTITY_SCHEMA[0]: entity_proto1.Encode(), 
                  APP_ENTITY_SCHEMA[1]: 1}}).and_return({'test/blah/test_kind:bob!/0000000002':
+=======
+    db_batch.should_receive("batch_get_entity").and_return({'test\x00blah\x00test_kind:bob!':
+                {APP_ENTITY_SCHEMA[0]: entity_proto1.Encode(), 
+                 APP_ENTITY_SCHEMA[1]: 1}}).and_return({'test\x00blah\x00test_kind:bob!\x000000000002':
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
                 {JOURNAL_SCHEMA[0]: entity_proto1.Encode()}})
 
     zookeeper = flexmock()
@@ -197,10 +242,17 @@ class TestDatastoreServer(unittest.TestCase):
     zookeeper.should_receive("get_valid_transaction_id").and_return(2)
     dd = DatastoreDistributed(db_batch, zookeeper)
 
+<<<<<<< HEAD
     self.assertEquals(({'test/blah/test_kind:bob!': 
                          {'txnID': "2", 'entity': entity_proto1.Encode()}
                        }, 
                        ['test/blah/test_kind:bob!']), 
+=======
+    self.assertEquals(({'test\x00blah\x00test_kind:bob!': 
+                         {'txnID': "2", 'entity': entity_proto1.Encode()}
+                       }, 
+                       ['test\x00blah\x00test_kind:bob!']), 
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
                        dd.fetch_keys([entity_proto1.key()]))
 
   def test_commit_transaction(self):
@@ -299,8 +351,13 @@ class TestDatastoreServer(unittest.TestCase):
     dd = DatastoreDistributed(db_batch, zookeeper)
 
     # Make sure it does not throw an exception
+<<<<<<< HEAD
     dd.put_entities("hello", entity_list, {"test/blah/test_kind:bob!":1, 
       "test/blah/test_kind:nancy!":1}) 
+=======
+    dd.put_entities("hello", entity_list, {"test\x00blah\x00test_kind:bob!":1, 
+      "test\x00blah\x00test_kind:nancy!":1}) 
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
 
   def test_acquire_locks_for_trans(self):
     dd = DatastoreDistributed(None, None) 
@@ -359,7 +416,11 @@ class TestDatastoreServer(unittest.TestCase):
     entity_proto2 = self.get_new_entity_proto("test", "test_kind", "nancy", "prop1name", 
                                               "prop2val", ns="blah")
     entity_list = [entity_proto1, entity_proto2]
+<<<<<<< HEAD
     self.assertEquals({'test/blah/test_kind:bob!': 1, 'test/blah/test_kind:nancy!': 2}, 
+=======
+    self.assertEquals({'test\x00blah\x00test_kind:bob!': 2, 'test\x00blah\x00test_kind:nancy!': 1}, 
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
                       dd.acquire_locks_for_nontrans("test", entity_list))
 
   def test_register_old_entities(self):
@@ -390,7 +451,11 @@ class TestDatastoreServer(unittest.TestCase):
   def test_delete_entities(self):
     entity_proto1 = self.get_new_entity_proto("test", "test_kind", "bob", "prop1name", 
                                               "prop1val", ns="blah")
+<<<<<<< HEAD
     row_key = "test/blah/test_kind:bob!"
+=======
+    row_key = "test\x00blah\x00test_kind:bob!"
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
     row_values = {row_key:{APP_ENTITY_SCHEMA[0]: entity_proto1.Encode(),
                          APP_ENTITY_SCHEMA[1]: '1'}}
 
@@ -425,7 +490,11 @@ class TestDatastoreServer(unittest.TestCase):
                                               "prop2val", ns="blah")
     entities = [entity_proto1, entity_proto2]
     dd.release_locks_for_nontrans("test", entities, 
+<<<<<<< HEAD
                   {'test/blah/test_kind:bob!': 1, 'test/blah/test_kind:nancy!': 2})
+=======
+                  {'test\x00blah\x00test_kind:bob!': 1, 'test\x00blah\x00test_kind:nancy!': 2})
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
  
   def test_root_key_from_entity_key(self):
     zookeeper = flexmock()
@@ -433,11 +502,19 @@ class TestDatastoreServer(unittest.TestCase):
     db_batch.should_receive("batch_put_entity").and_return(None)
 
     dd = DatastoreDistributed(db_batch, zookeeper) 
+<<<<<<< HEAD
     self.assertEquals("test/blah/test_kind:bob!", 
                       dd.get_root_key_from_entity_key("test/blah/test_kind:bob!nancy!"))
     entity_proto1 = self.get_new_entity_proto("test", "test_kind", "nancy", "prop1name", 
                                               "prop2val", ns="blah")
     self.assertEquals("test/blah/test_kind:nancy!", 
+=======
+    self.assertEquals("test\x00blah\x00test_kind:bob!", 
+                      dd.get_root_key_from_entity_key("test\x00blah\x00test_kind:bob!nancy!"))
+    entity_proto1 = self.get_new_entity_proto("test", "test_kind", "nancy", "prop1name", 
+                                              "prop2val", ns="blah")
+    self.assertEquals("test\x00blah\x00test_kind:nancy!", 
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
       dd.get_root_key_from_entity_key(entity_proto1.key()))
 
   def test_remove_tombstoned_entities(self):
@@ -459,7 +536,11 @@ class TestDatastoreServer(unittest.TestCase):
     db_batch = flexmock()
     db_batch.should_receive("batch_put_entity").and_return(None)
     db_batch.should_receive("batch_get_entity").and_return(
+<<<<<<< HEAD
                {"test/blah/test_kind:nancy!": 
+=======
+               {"test\x00blah\x00test_kind:nancy!": 
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
                  {
                    APP_ENTITY_SCHEMA[0]: entity_proto1.Encode(),
                    APP_ENTITY_SCHEMA[1]: 1
@@ -498,7 +579,11 @@ class TestDatastoreServer(unittest.TestCase):
     tombstone1 = {'key': {APP_ENTITY_SCHEMA[0]:TOMBSTONE, APP_ENTITY_SCHEMA[1]: 1}}
     db_batch = flexmock()
     db_batch.should_receive("batch_get_entity").and_return(
+<<<<<<< HEAD
                {"test/blah/test_kind:nancy!": 
+=======
+               {"test\x00blah\x00test_kind:nancy!": 
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
                  {
                    APP_ENTITY_SCHEMA[0]: entity_proto1.Encode(),
                    APP_ENTITY_SCHEMA[1]: 1
@@ -506,7 +591,11 @@ class TestDatastoreServer(unittest.TestCase):
                })
 
     db_batch.should_receive("batch_put_entity").and_return(None)
+<<<<<<< HEAD
     entity_proto1 = {'test/blah/test_kind:nancy!':{APP_ENTITY_SCHEMA[0]:entity_proto1.Encode(),
+=======
+    entity_proto1 = {'test\x00blah\x00test_kind:nancy!':{APP_ENTITY_SCHEMA[0]:entity_proto1.Encode(),
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
                       APP_ENTITY_SCHEMA[1]: 1}}
     db_batch.should_receive("range_query").and_return([entity_proto1, tombstone1]).and_return([])
     zookeeper = flexmock()
@@ -532,7 +621,11 @@ class TestDatastoreServer(unittest.TestCase):
     tombstone1 = {'key': {APP_ENTITY_SCHEMA[0]:TOMBSTONE, APP_ENTITY_SCHEMA[1]: 1}}
     db_batch = flexmock()
     db_batch.should_receive("batch_get_entity").and_return(
+<<<<<<< HEAD
                {"test/blah/test_kind:nancy!": 
+=======
+               {"test\x00blah\x00test_kind:nancy!": 
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
                  {
                    APP_ENTITY_SCHEMA[0]: entity_proto1.Encode(),
                    APP_ENTITY_SCHEMA[1]: 1
@@ -540,7 +633,11 @@ class TestDatastoreServer(unittest.TestCase):
                })
 
     db_batch.should_receive("batch_put_entity").and_return(None)
+<<<<<<< HEAD
     entity_proto1 = {'test/blah/test_kind:nancy!':{APP_ENTITY_SCHEMA[0]:entity_proto1.Encode(),
+=======
+    entity_proto1 = {'test\x00blah\x00test_kind:nancy!':{APP_ENTITY_SCHEMA[0]:entity_proto1.Encode(),
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
                       APP_ENTITY_SCHEMA[1]: 1}}
     db_batch.should_receive("range_query").and_return([entity_proto1, tombstone1]).and_return([])
     zookeeper = flexmock()

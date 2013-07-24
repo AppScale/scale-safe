@@ -132,7 +132,11 @@ class MemcacheService(apiproxy_stub.APIProxyStub):
     self._byte_hits = 0
     self._cache_creation_time = self._gettime()
 
+<<<<<<< HEAD
   def _GetKey(self, namespace, key):
+=======
+  def _GetKey(self, namespace, key, flags=None):
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
     """Retrieves a CacheEntry from the cache if it hasn't expired.
 
     Does not take deletion timeout into account.
@@ -145,6 +149,7 @@ class MemcacheService(apiproxy_stub.APIProxyStub):
       The corresponding CacheEntry instance, or None if it was not found or
       has already expired.
     """
+<<<<<<< HEAD
     internal_key = self._Get_Internal_Key(namespace, key)
 
     entry = self._memcache.get(internal_key)
@@ -152,6 +157,9 @@ class MemcacheService(apiproxy_stub.APIProxyStub):
       return None
     else:
       return entry
+=======
+    return self._memcache.get(self._Get_Internal_Key(namespace, key, flags))
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
 
   def _Dynamic_Get(self, request, response):
     """Implementation of MemcacheService::Get().
@@ -166,9 +174,17 @@ class MemcacheService(apiproxy_stub.APIProxyStub):
       value = self._GetKey(namespace, key)
       if value is None: 
         continue
+<<<<<<< HEAD
       item = response.add_item()
       item.set_key(key)
       item.set_value(value)
+=======
+      flags = self._GetKey(namespace, key, 'flags')
+      item = response.add_item()
+      item.set_key(key)
+      item.set_value(value)
+      item.set_flags(flags)
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
 
   def _Dynamic_Set(self, request, response):
     """Implementation of MemcacheService::Set().
@@ -193,6 +209,10 @@ class MemcacheService(apiproxy_stub.APIProxyStub):
             or not old_entry.CheckLocked()):
           internal_key = self._Get_Internal_Key(namespace, key)
           if self._memcache.set(internal_key, item.value(), item.expiration_time()):
+<<<<<<< HEAD
+=======
+            self._memcache.set(internal_key + 'flags', item.flags(), item.expiration_time())
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
             set_status = MemcacheSetResponse.STORED
 
       response.add_set_status(set_status)
@@ -215,6 +235,10 @@ class MemcacheService(apiproxy_stub.APIProxyStub):
       else:
         internal_key = self._Get_Internal_Key(namespace, key)
         self._memcache.delete(internal_key)
+<<<<<<< HEAD
+=======
+        self._memcache.delete(internal_key + 'flags')
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
 
       response.add_delete_status(delete_status)
 
@@ -292,7 +316,11 @@ class MemcacheService(apiproxy_stub.APIProxyStub):
     stats.set_bytes(bytes)
     stats.set_oldest_item_age(oldest_item_age)
 
+<<<<<<< HEAD
   def _Get_Internal_Key(self, namespace, key):
+=======
+  def _Get_Internal_Key(self, namespace, key, flags=None):
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
     """Used to get the Memcache key. It is encoded because the sdk
        allows special characters but the Memcache client does not.
       
@@ -306,4 +334,9 @@ class MemcacheService(apiproxy_stub.APIProxyStub):
     appname = os.environ['APPNAME']
     encoded_key = base64.b64encode(key) 
     internal_key = "__" + appname + "__" + namespace + "__" + encoded_key
+<<<<<<< HEAD
+=======
+    if flags:
+      internal_key += "flags"
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
     return internal_key 

@@ -1,5 +1,9 @@
 #!/bin/bash
 
+<<<<<<< HEAD
+=======
+set -e
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
 export DIST=`lsb_release -c -s`
 
 cd `dirname $0`/..
@@ -35,7 +39,11 @@ fi
 
 echo "Installing Ubuntu ${DIST} building environment."
 
+<<<<<<< HEAD
 apt-get -y install curl
+=======
+apt-get -y install curl wget
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
 curl -d "key=appscale" http://heart-beat.appspot.com/sign
 
 export APPSCALE_HOME_RUNTIME=`pwd`
@@ -79,7 +87,11 @@ apt-get install -y cmake
 
 # install package for build
 apt-get install -y autoconf automake libtool gcc g++ pkg-config ant maven2\
+<<<<<<< HEAD
  doxygen graphviz rsync tcl-dev python-tk tk8.4-dev ntp cvs wget\
+=======
+ doxygen graphviz rsync tcl-dev python-tk tk8.4-dev ntp cvs\
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
  bzr xterm screen build-essential bison flex byacc unzip bzip2\
  libc6-dev subversion\
  erlang\

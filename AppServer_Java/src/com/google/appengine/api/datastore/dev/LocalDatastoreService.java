@@ -530,6 +530,7 @@ public final class LocalDatastoreService extends AbstractLocalRpcService
         {
             return response;
         }
+<<<<<<< HEAD
         DatastoreV3Pb.Cost totalCost = response.getMutableCost();
         String app = ((OnestoreEntity.EntityProto)request.entitys().get(0)).getKey().getApp();
         List clones = new ArrayList();
@@ -580,6 +581,9 @@ public final class LocalDatastoreService extends AbstractLocalRpcService
         /*
          * AppScale - remainder of body replaced
          */
+=======
+        String app = ((OnestoreEntity.EntityProto)request.entitys().get(0)).getKey().getApp(); 
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
         proxy.doPost(app, "Put", request, response);
         if (!request.hasTransaction())
         {

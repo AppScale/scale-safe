@@ -13,7 +13,11 @@ Google App Engine platforms.
 To find out more visit http://appscale.com
 
 ## Latest Release ##
+<<<<<<< HEAD
 The latest stable release is AppScale 1.8.0, released June 17, 2013.
+=======
+The latest stable release is AppScale 1.9.0, released July 22, 2013.
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
 Feature requests and pull requests gladly welcomed.
 
 ## Mailing List ##

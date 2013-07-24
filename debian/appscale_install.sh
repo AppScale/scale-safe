@@ -56,6 +56,10 @@ case "$1" in
         updatealternatives
 	sethosts
         setulimits
+<<<<<<< HEAD
+=======
+        increaseconnections
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
 	;;
     cassandra)
 	installcassandra
@@ -139,5 +143,9 @@ case "$1" in
 	setupntpcron
         sethosts
         setulimits
+<<<<<<< HEAD
+=======
+        increaseconnections
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
 	;;
 esac

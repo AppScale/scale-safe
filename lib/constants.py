@@ -4,7 +4,11 @@ This file contains constants used throughout AppScale.
 import os 
 
 # The current version of AppScale.
+<<<<<<< HEAD
 APPSCALE_VERSION = "1.8.0"
+=======
+APPSCALE_VERSION = "1.9.0"
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
 
 # AppScale home directory.
 APPSCALE_HOME = os.environ.get("APPSCALE_HOME", "/root/appscale")

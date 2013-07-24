@@ -8,6 +8,22 @@ require 'logger'
 require 'soap/rpc/driver'
 require 'yaml'
 
+<<<<<<< HEAD
+=======
+require 'net/http'
+require 'openssl'
+
+class Net::HTTP
+  alias_method :old_initialize, :initialize
+  def initialize(*args)
+    old_initialize(*args)
+    @ssl_context = OpenSSL::SSL::SSLContext.new
+    @ssl_context.verify_mode = OpenSSL::SSL::VERIFY_NONE
+  end
+end
+
+
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
 environment = YAML.load_file('/etc/appscale/environment.yaml')
 environment.each { |k,v| ENV[k] = v }
 

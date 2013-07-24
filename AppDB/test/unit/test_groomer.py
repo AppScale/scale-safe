@@ -89,12 +89,21 @@ class TestGroomer(unittest.TestCase):
       get_root_key_from_entity_key("hi/!otherstuff!moar"))
 
   def test_get_prefix_from_entity(self):
+<<<<<<< HEAD
     self.assertEquals("hi/bye", groomer.DatastoreGroomer.\
       get_prefix_from_entity_key("hi/bye/some/other/stuff"))
 
     # Test empty namespace (very common).
     self.assertEquals("hi/", groomer.DatastoreGroomer.\
       get_prefix_from_entity_key("hi//some/other/stuff"))
+=======
+    self.assertEquals("hi\x00bye", groomer.DatastoreGroomer.\
+      get_prefix_from_entity_key("hi\x00bye\x00some\x00other\x00stuff"))
+
+    # Test empty namespace (very common).
+    self.assertEquals("hi\x00", groomer.DatastoreGroomer.\
+      get_prefix_from_entity_key("hi\x00\x00some\x00other\x00stuff"))
+>>>>>>> e2a9b0a2e1e42ad88baa49052f1e34a0ef380246
 
   def test_run_groomer(self):
     zookeeper = flexmock()
