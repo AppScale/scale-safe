@@ -210,9 +210,9 @@ class TestDatastoreServer(unittest.TestCase):
     dd = DatastoreDistributed(db_batch, zookeeper)
     commit_request = datastore_pb.Transaction()
     commit_request.set_handle(123)
-    commit_request.set_app("aaa")
+    commit_request.set_app("apichecker")
     http_request = commit_request.Encode()
-    self.assertEquals(dd.commit_transaction("app_id", http_request),
+    self.assertEquals(dd.commit_transaction("apichecker", http_request),
                       (datastore_pb.CommitResponse().Encode(), 0, ""))
 
   def test_rollback_transcation(self):
@@ -223,9 +223,9 @@ class TestDatastoreServer(unittest.TestCase):
     dd = DatastoreDistributed(db_batch, zookeeper)
     commit_request = datastore_pb.Transaction()
     commit_request.set_handle(123)
-    commit_request.set_app("aaa")
+    commit_request.set_app("apichecker")
     http_request = commit_request.Encode()
-    self.assertEquals(dd.rollback_transaction("app_id", http_request),
+    self.assertEquals(dd.rollback_transaction("apichecker", http_request),
                       (api_base_pb.VoidProto().Encode(), 0, ""))
 
   def get_new_entity_proto(self, app_id, kind, entity_name, prop_name, prop_value, ns=""):
@@ -327,7 +327,7 @@ class TestDatastoreServer(unittest.TestCase):
     zookeeper.should_receive("acquire_lock").once()
     dd = DatastoreDistributed(None, zookeeper) 
     entity = flexmock()
-    entity.should_receive("app").and_return("appid")
+    entity.should_receive("app").and_return("apichecker")
     flexmock(dd).should_receive("is_instance_wrapper").and_return(True) \
       .and_return(True).and_return(True)
     flexmock(dd).should_receive("get_root_key_from_entity_key").and_return("rootkey").once()
@@ -338,7 +338,7 @@ class TestDatastoreServer(unittest.TestCase):
     zookeeper.should_receive("notify_failed_transaction").once()
     dd = DatastoreDistributed(None, zookeeper) 
     entity = flexmock()
-    entity.should_receive("app").and_return("appid")
+    entity.should_receive("app").and_return("apichecker")
     flexmock(dd).should_receive("is_instance_wrapper").and_return(True) \
       .and_return(True).and_return(True)
     flexmock(dd).should_receive("get_root_key_from_entity_key").and_return("rootkey").once()

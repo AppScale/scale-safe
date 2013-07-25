@@ -82,6 +82,9 @@ TOMBSTONE = "APPSCALE_SOFT_DELETE"
 # Local datastore location through nginx.
 LOCAL_DATASTORE = "localhost:8888"
 
+# Reserved application identifiers which are AppScale internal applications.
+RESERVED_APP_IDS = ["apichecker", "appscaledashboard"]
+
 class DatastoreDistributed():
   """ AppScale persistent layer for the datastore API. It is the 
       replacement for the AppServers to persist their data into 
@@ -124,9 +127,6 @@ class DatastoreDistributed():
 
   # How long to wait before retrying to grab a lock
   LOCK_RETRY_TIME = .5
-
-  # Reserved application identifiers which are AppScale internal applications.
-  _RESERVED_APP_IDS = ["apichecker", "appscaledashboard"]
 
   def __init__(self, datastore_batch, zookeeper=None):
     """
@@ -277,7 +277,8 @@ class DatastoreDistributed():
     Returns:
       Key string for storing namespaces.
     """
-    return "{0}{4}{1}{5}{2}{5}{3}".format(app_id, name_space, kind, index_name, self._NAMESPACE_SEPARATOR, self._SEPARATOR)
+    return "{0}{4}{1}{5}{2}{5}{3}".format(app_id, name_space, kind, 
+      index_name, self._NAMESPACE_SEPARATOR, self._SEPARATOR)
 
   def get_table_prefix(self, data):
     """ Returns the namespace prefix for a query.
@@ -293,7 +294,8 @@ class DatastoreDistributed():
     if not isinstance(data, tuple):
       data = (data.app(), data.name_space())
 
-    prefix = "{0}{2}{1}".format(data[0], data[1], self._SEPARATOR).replace('"', '""')
+    prefix = "{0}{2}{1}".format(data[0], data[1], 
+      self._SEPARATOR).replace('"', '""')
 
     return prefix
 
@@ -708,7 +710,7 @@ class DatastoreDistributed():
     Raises:
       ZKTransactionException: If we are unable to acquire/release ZooKeeper locks.
     """
-    if app_id not in self._RESERVED_APP_IDS:
+    if app_id not in RESERVED_APP_IDS:
       mapper = pb_mapper.PbMapper(app_id=app_id, dataset=app_id)
       req = mapper.convert_blind_put_request(put_request)
       response = mapper.send_blind_write(req)
@@ -725,8 +727,8 @@ class DatastoreDistributed():
 
     start_id = None
     if num_of_required_ids > 0:
-       start_id, _ = self.allocate_ids(app_id, num_of_required_ids, 
-         num_retries=3)
+      start_id, _ = self.allocate_ids(app_id, num_of_required_ids, 
+        num_retries=3)
 
     id_counter = 0
     for entity in entities:
@@ -1145,7 +1147,7 @@ class DatastoreDistributed():
     Raises:
       ZKTransactionException: If a lock was unable to get acquired.
     """ 
-    if app_id not in self._RESERVED_APP_IDS:
+    if app_id not in RESERVED_APP_IDS:
       mapper = pb_mapper.PbMapper(app_id=app_id, dataset=app_id)
       req = mapper.convert_get_request(get_request)
       response = mapper.send_lookup(req)
@@ -1180,7 +1182,7 @@ class DatastoreDistributed():
       app_id: The application ID.
       delete_request: Request with a list of keys.
     """
-    if app_id not in self._RESERVED_APP_IDS:
+    if app_id not in RESERVED_APP_IDS:
       mapper = pb_mapper.PbMapper(app_id=app_id, dataset=app_id)
       gcd_delete = mapper.convert_delete_request_to_blind_write(delete_request)
       response = mapper.send_blind_write(gcd_delete)
@@ -1264,7 +1266,8 @@ class DatastoreDistributed():
     if e.property_list():
       plist = e.property_list()
     else:   
-      rkey = "{0}{2}{1}".format(prefix, self.__encode_index_pb(e.key().path()), self._SEPARATOR)
+      rkey = "{0}{2}{1}".format(prefix, self.__encode_index_pb(e.key().path()),
+        self._SEPARATOR)
       ret = self.datastore_batch.batch_get_entity(dbconstants.APP_ENTITY_TABLE, 
         [rkey], dbconstants.APP_ENTITY_SCHEMA)
 
@@ -1348,7 +1351,8 @@ class DatastoreDistributed():
     """ 
     ancestor = query.ancestor()
     prefix = self.get_table_prefix(query)
-    path = buffer(prefix + self._SEPARATOR) + self.__encode_index_pb(ancestor.path())
+    path = buffer(prefix + self._SEPARATOR) + self.__encode_index_pb(
+      ancestor.path())
     txn_id = 0
     if query.has_transaction(): 
       txn_id = query.transaction().handle()   
@@ -1401,7 +1405,8 @@ class DatastoreDistributed():
     """       
     ancestor = query.ancestor()
     prefix = self.get_table_prefix(query)
-    path = buffer(prefix + self._SEPARATOR) + self.__encode_index_pb(ancestor.path())
+    path = buffer(prefix + self._SEPARATOR) + self.__encode_index_pb(
+      ancestor.path())
     txn_id = 0
     if query.has_transaction(): 
       txn_id = query.transaction().handle()   
@@ -1612,9 +1617,10 @@ class DatastoreDistributed():
     end_inclusive = self._ENABLE_INCLUSIVITY
     start_inclusive = self._ENABLE_INCLUSIVITY
     prefix = self.get_table_prefix(query)
-    startrow = prefix + self._SEPARATOR + query.kind() + '!' + str(ancestor_filter)
-    endrow = prefix + self._SEPARATOR + query.kind() + '!' + str(ancestor_filter) + \
-      self._TERM_STRING
+    startrow = prefix + self._SEPARATOR + query.kind() + '!' + \
+      str(ancestor_filter)
+    endrow = prefix + self._SEPARATOR + query.kind() + '!' + \
+      str(ancestor_filter) + self._TERM_STRING
     if '__key__' not in filter_info:
       return startrow, endrow, start_inclusive, end_inclusive
 
@@ -2249,7 +2255,7 @@ class DatastoreDistributed():
       query: The query to run.
       query_result: The response given to the application server.
     """
-    if query.app() not in self._RESERVED_APP_IDS:
+    if query.app() not in RESERVED_APP_IDS:
       mapper = pb_mapper.PbMapper(app_id=query.app(), dataset=query.app())
       req = mapper.convert_query_request(query)
       response = mapper.send_query(req)
@@ -2486,8 +2492,18 @@ class MainHandler(tornado.web.RequestHandler):
       An encoded transaction protocol buffer with a unique handler.
     """
     global datastore_access
+
     begin_transaction_req_pb = datastore_pb.BeginTransactionRequest(
       http_request_data)
+
+    if app_id not in RESERVED_APP_IDS:
+      mapper = pb_mapper.PbMapper(app_id=app_id, dataset=app_id)
+      req = mapper.convert_begin_transaction_request(
+        begin_transaction_req_pb)
+      response = mapper.send_begin_transaction_request(req)
+      transaction_pb = mapper.convert_begin_transaction_response(response)
+      return (transaction_pb.Encode(), 0, "")
+
     multiple_eg = False
     if begin_transaction_req_pb.has_allow_multiple_eg():
       multiple_eg = begin_transaction_req_pb.allow_multiple_eg()

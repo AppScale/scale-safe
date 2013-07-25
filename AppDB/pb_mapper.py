@@ -449,6 +449,16 @@ class PbMapper():
     """
     return googledatastore.BeginTransactionRequest()
 
+  def send_begin_transaction_request(self, request):
+    """ Sends a Google Cloud Datastore begin transaction request.
+  
+    Args:
+      request: A googledatastore.BeginTransactionRequest.
+    Returns:
+      A googledatastore.BeginTransactionResponse.
+    """
+    return googledatastore.begin_transaction(request)
+
   def convert_begin_transaction_response(self, response):
     """ Converts a Google Cloud Datastore begin response to a
     datastore_pb.BeginResponse.

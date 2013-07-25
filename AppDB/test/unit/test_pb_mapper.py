@@ -235,5 +235,21 @@ class TestPBMapper(unittest.TestCase):
     self.assertEquals(True, query_result.has_more_results())
     self.assertEquals(True, query_result.keys_only())
 
+  def test_convert_begin_transaction_request(self):
+    begin_trans_req = datastore_pb.BeginTransactionRequest()
+    mapper = pb_mapper.PbMapper(app_id="app_id", dataset="dataset")
+    gcd_begin_req = mapper.convert_begin_transaction_request(begin_trans_req)
+    self.assertTrue(isinstance(gcd_begin_req, 
+      googledatastore.BeginTransactionRequest))
+  
+  def test_convert_begin_transaction_response(self):
+    gcd_trans_resp = googledatastore.BeginTransactionResponse()
+    gcd_trans_resp.transaction = "txnid"
+    mapper = pb_mapper.PbMapper(app_id="app_id", dataset="dataset")
+    begin_resp = mapper.convert_begin_transaction_response(gcd_trans_resp)
+    self.assertTrue(isinstance(begin_resp, 
+      datastore_pb.Transaction))
+    
+
 if __name__ == "__main__":
   unittest.main()    
