@@ -471,6 +471,27 @@ class PbMapper():
     transaction_pb.set_handle(response.transaction)
     return transaction_pb 
 
+  def convert_rollback_request(self, request):
+    """ Converts a Google App Engine rollback request to a Google Cloud 
+    Datastore rollback request.
+
+    Args:
+      request: A datastore_pb.Transaction.
+    Returns:
+      A googledatastore.RollbackRequest.
+    """
+    gcd_rollback_request = googledatastore.RollbackRequest()
+    gcd_rollback_request.transaction = request.handle()
+    return gcd_rollback_request
+
+  def send_rollback_request(self, request):
+    """ Sends a rollback request to Google Cloud Datastore service.
+
+    Args:
+      request: A googledatastore.RollbackRequest.
+    """
+    googledatastore.rollback(request)
+
   def convert_commit_transaction_request(self, request):
     """ Converts a datastore_pb.CommitTransactionRequest to a Google Cloud 
     Datastore commit request.

@@ -249,7 +249,14 @@ class TestPBMapper(unittest.TestCase):
     begin_resp = mapper.convert_begin_transaction_response(gcd_trans_resp)
     self.assertTrue(isinstance(begin_resp, 
       datastore_pb.Transaction))
-    
+  
+  def test_convert_rollback_request(self):
+    rollback_req = datastore_pb.Transaction()
+    rollback_req.set_handle("txnid")
+    rollback_req.set_app("appid")
+    mapper = pb_mapper.PbMapper(app_id="app_id", dataset="dataset")
+    gcd_rollback_req = mapper.convert_rollback_request(rollback_req)   
+    self.assertTrue(isinstance(gcd_rollback_req, googledatastore.RollbackRequest))
 
 if __name__ == "__main__":
   unittest.main()    

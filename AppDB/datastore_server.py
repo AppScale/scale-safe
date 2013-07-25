@@ -2328,6 +2328,13 @@ class DatastoreDistributed():
     txn = datastore_pb.Transaction(http_request_data)
     logging.info("Doing a rollback on transaction id {0} for app id {1}"
       .format(txn.handle(), app_id))
+
+    if app_id not in RESERVED_APP_IDS:
+      mapper = pb_mapper.PbMapper(app_id=app_id, dataset=app_id)
+      req = mapper.convert_rollback_request(txn)
+      response = mapper.send_rollback_request(req)
+      return (api_base_pb.VoidProto().Encode(), 0, "")
+
     try:
       self.zookeeper.notify_failed_transaction(app_id, txn.handle())
       return (api_base_pb.VoidProto().Encode(), 0, "")
