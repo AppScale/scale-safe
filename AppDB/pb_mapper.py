@@ -528,9 +528,14 @@ class PbMapper():
     Returns:
       The mapped over Google Cloud Datastore QueryResult.
     """
-    #TODO projection queries
     gcd_run_query_request = googledatastore.RunQueryRequest()
     gcd_query = gcd_run_query_request.query
+
+    if request.has_transaction():
+      gcd_run_query_request.read_options.transaction = \
+        request.transaction().handle()
+
+    #TODO projection queries
     if request.has_kind():
       kind_expression = gcd_query.kind.add()
       kind_expression.name = request.kind()

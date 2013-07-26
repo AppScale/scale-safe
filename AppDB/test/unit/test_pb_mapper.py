@@ -203,6 +203,9 @@ class TestPBMapper(unittest.TestCase):
 
   def test_convert_query_request(self):
     query_request = datastore_pb.Query()
+    query_transaction = query_request.mutable_transaction()
+    query_transaction.set_handle("txnid")
+    query_transaction.set_app("app_id")
     query_request.set_kind("kind")
     query_request.set_limit(10)
     query_request.set_offset(1)
