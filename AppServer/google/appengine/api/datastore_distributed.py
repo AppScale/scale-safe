@@ -43,6 +43,9 @@ from google.appengine.datastore import entity_pb
 from google.appengine.ext.remote_api import remote_api_pb
 from google.appengine.datastore import old_datastore_stub_util
 
+from google.appengine.datastore import googledatastore
+from google.appengine.datastore import pb_mapper
+
 # Where the SSL certificate is placed for encrypted communication
 CERT_LOCATION = "/etc/appscale/certs/mycert.pem"
 
@@ -78,8 +81,9 @@ _BATCH_SIZE = 20
 
 _MAX_ACTIONS_PER_TXN = 5
 
-
-
+# These application IDs use the AppScale backend, rather than the
+# Google Cloud Datastore backend.
+_RESERVED_APP_IDS = ["appscaledashboard", "apichecker"]
 
 
 class DatastoreDistributed(apiproxy_stub.APIProxyStub):
@@ -129,7 +133,10 @@ class DatastoreDistributed(apiproxy_stub.APIProxyStub):
                history_file=None,
                require_indexes=False,
                service_name='datastore_v3',
-               trusted=False):
+               trusted=False,
+               private_key='',
+               email_account='',
+               dataset=''):
     """Constructor.
 
     Args:
@@ -141,12 +148,18 @@ class DatastoreDistributed(apiproxy_stub.APIProxyStub):
       service_name: Service name expected for all calls.
       trusted: bool, default False.  If True, this stub allows an app to
         access the data of another app.
+      private_key: A str, the Google Cloud Datastore private key location.
+      email_account: A str, the Google Cloud Datastore email account.
+      dataset: A str, the Google Cloud Datastore dataset.
     """
     super(DatastoreDistributed, self).__init__(service_name)
 
     # TODO lock any use of these global variables
     assert isinstance(app_id, basestring) and app_id != ''
     self.__app_id = app_id
+    self.__private_key = private_key
+    self.__email_account = email_account
+    self.__dataset = dataset
     self.__datastore_location = datastore_location
 
     self.__is_encrypted = True
@@ -168,6 +181,14 @@ class DatastoreDistributed(apiproxy_stub.APIProxyStub):
 
     self.__require_indexes = require_indexes
 
+    # A tuple of datetime and a list of entities from put requests.
+    self.__txn_put_requests = {}
+
+    # A tuple of datetime and a list of keys from delete requests.
+    self.__txn_delete_request = {}
+
+    self.__mapper = pb_mapper.PbMapper(app_id=self.__app_id, 
+      dataset=self.__dataset)
 
   def Clear(self):
     """ Clears the datastore by deleting all currently stored entities and
@@ -175,6 +196,7 @@ class DatastoreDistributed(apiproxy_stub.APIProxyStub):
     self.__entities = {}
     self.__queries = {}
     self.__schema_cache = {}
+    self.__txn_requests = {}
 
   def SetTrusted(self, trusted):
     """Set/clear the trusted bit in the stub.
@@ -309,15 +331,80 @@ class DatastoreDistributed(apiproxy_stub.APIProxyStub):
    
     response.ParseFromString(api_response.response())
 
+  def _assign_ids(self, entities):
+    """ Assigns IDs for a list of entities which lack IDs. 
+ 
+    Args:
+      entities: A list of entitiy_pb.EntityProto.
+    Returns:
+      A list of entity_pb.References which have full key paths assigned.
+    """
+    full_path_keys = []
+    requires_ids = False
+    for entity in entities:
+      last_path = entity.key().path().element_list()[-1]
+      if last_path.id() == 0 and not last_path.has_name():
+        requires_ids = True
+        allocate_id_req = googledatastore.AllocateIdsRequest()
+        new_key = allocate_id_req.key.add() 
+        for element in entity.key().path().element_list():
+          path_element = new_key.path_element.add()
+          path_element.kind = element.type()
+          if element.has_name():
+            path_element.name = element.name()
+          elif element.id() != 0:
+            path_element.id = element.id()
+      else:
+        full_path_keys.append(entity.key())
+
+    if not requires_ids:
+      return full_path_keys
+
+    # Get full paths from GCD. 
+    allocate_resp = googledatastore.AllocateIds(allocate_id_req)
+    for key in allocate_resp.key:
+      new_key = entity_pb.Reference() 
+      new_key.set_app(self.__app_id)
+      for path_element in key.path_element:
+        new_element = new_key.mutable_path().add_element()
+        new_element.set_id(path_element.id)
+        new_element.set_type(path_element.kind)
+      full_path_keys.append(new_key)
+
+    return full_path_keys
+    
   def _Dynamic_Put(self, put_request, put_response):
     """Send a put request to the datastore server. """
-    put_request.set_trusted(self.__trusted)
-    self._RemoteSend(put_request, put_response, "Put")
-    return put_response 
+    if self.__app_id in _RESERVED_APP_IDS or \
+      not put_request.has_transaction():
+      put_request.set_trusted(self.__trusted)
+      self._RemoteSend(put_request, put_response, "Put")
+      return put_response 
+
+    txn_handle = put_request.transaction().handle()    
+
+    entities = put_request.entity_list()
+    # Acquire IDs for puts which do not have ids.
+    # Call allocate IDs for this
+    key_list = self._assign_ids(entities)
+ 
+    if txn_handle not in self.__txn_requests:
+      raise Exception("Transaction does not exist")
+    else:
+      self.__txn_requests[txn_handle].append(put_request)
+
+    put_response.key_list().extend(key_list)
+    return put_response
 
   def _Dynamic_Get(self, get_request, get_response):
     """Send a get request to the datastore server. """
-    self._RemoteSend(get_request, get_response, "Get")
+    if self.__app_id in _RESERVED_APP_IDS:
+      self._RemoteSend(get_request, get_response, "Get")
+    else:
+      req = self.__mapper.convert_get_request(get_request)
+      response = self.__mapper.send_lookup(req)
+      self.__mapper.convert_get_response(response, get_response)
+
     return get_response
 
 
@@ -339,6 +426,7 @@ class DatastoreDistributed(apiproxy_stub.APIProxyStub):
 
   def _Dynamic_RunQuery(self, query, query_result):
     """Send a query request to the datastore server. """
+
     if query.has_transaction():
       if not query.has_ancestor():
         raise apiproxy_errors.ApplicationError(
@@ -353,12 +441,17 @@ class DatastoreDistributed(apiproxy_stub.APIProxyStub):
     if not query.has_app():
       query.set_app(self.__app_id)
     self.__ValidateAppId(query.app())
-    self._RemoteSend(query, query_response, "RunQuery")
+
+    if query.app() not in _RESERVED_APP_IDS:
+      req = self.__mapper.convert_query_request(query)
+      response = self.__mapper.send_query(req)
+      self.__mapper.convert_query_response(response, query_response)
+    else:
+      self._RemoteSend(query, query_response, "RunQuery")
 
     skipped_results = 0
     if query_response.has_skipped_results():
       skipped_results = query_response.skipped_results()
-
 
     def has_prop_indexed(entity, prop):
       """Returns True if prop is in the entity and is indexed."""
@@ -498,9 +591,18 @@ class DatastoreDistributed(apiproxy_stub.APIProxyStub):
 
   def _Dynamic_BeginTransaction(self, request, transaction):
     """Send a begin transaction request from the datastore server. """
-    request.set_app(self.__app_id)
-    self._RemoteSend(request, transaction, "BeginTransaction")
-    self.__tx_actions = []
+    if self.__app_id in _RESERVED_APP_IDS:
+      request.set_app(self.__app_id)
+      self._RemoteSend(request, transaction, "BeginTransaction")
+      self.__tx_actions = []
+      return transaction
+
+    req = self.__mapper.convert_begin_transaction_request(
+      begin_transaction_req_pb)
+    response = self.__mapper.send_begin_transaction_request(req)
+
+    transaction.MergeFrom(self.__mapper.convert_begin_transaction_response(
+      response))
     return transaction
 
   def _Dynamic_AddActions(self, request, _):
