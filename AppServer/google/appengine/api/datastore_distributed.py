@@ -382,7 +382,17 @@ class DatastoreDistributed(apiproxy_stub.APIProxyStub):
       full_path_keys.append(new_key)
 
     return full_path_keys
-    
+   
+  def _check_handle(self, handle):
+    """ Checks to see if a transaction handle exists.
+ 
+    Args:
+      handle: The transaction identifier.
+    Returns:
+      True if the transaction exists, False otherwise.
+    """
+    return txn_handle in self.__txn_requests
+ 
   def _Dynamic_Put(self, put_request, put_response):
     """Send a put request to the datastore server. """
     if self.__app_id in _RESERVED_APP_IDS:
@@ -406,8 +416,7 @@ class DatastoreDistributed(apiproxy_stub.APIProxyStub):
     else:
       txn_handle = put_request.transaction().handle()    
 
-
-    if txn_handle not in self.__txn_requests:
+    if not self._check_handle(txn_handle):
       raise Exception("Transaction %s does not exist" % txn_handle)
 
     entity_list = put_request.entity_list()
@@ -462,14 +471,14 @@ class DatastoreDistributed(apiproxy_stub.APIProxyStub):
     else:
       txn_handle = delete_request.transaction().handle()    
 
-    if txn_handle not in self.__txn_requests:
+    if not self._check_handle():
       raise Exception("Transaction %s does not exist" % txn_handle)
     
     key_list = delete_request.key_list()
     if txn_handle in self.__txn_delete_request:
-      self.__txn_delete_requests[txn_handle].extend(key_list)
+      self.__txn_delete_request[txn_handle].extend(key_list)
     else:
-      self.__txn_delete_requests[txn_handle] = key_list
+      self.__txn_delete_request[txn_handle] = key_list
 
     # Commit this wrapped transaction if its a stand alone delete.
     if create_transaction_wrapper:
@@ -730,11 +739,10 @@ class DatastoreDistributed(apiproxy_stub.APIProxyStub):
       return
 
     handle = transaction.handle()
-    if handle not in self.__txn_requests:
+    if not self._check_handle(handle):
       raise apiproxy_errors.ApplicationError(
         datastore_pb.Error.BAD_REQUEST,
         "Transaction %s does not exist" % handle)
-
 
     puts = []
     deletes = []
