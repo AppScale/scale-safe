@@ -24,7 +24,6 @@ import appscale_datastore_batch
 import dbconstants
 import groomer
 import helper_functions
-import pb_mapper
 
 from zkappscale import zktransaction as zk
 from zkappscale.zktransaction import ZKInternalException
@@ -81,9 +80,6 @@ TOMBSTONE = "APPSCALE_SOFT_DELETE"
 
 # Local datastore location through nginx.
 LOCAL_DATASTORE = "localhost:8888"
-
-# Reserved application identifiers which are AppScale internal applications.
-RESERVED_APP_IDS = ["apichecker", "appscaledashboard"]
 
 class DatastoreDistributed():
   """ AppScale persistent layer for the datastore API. It is the 
@@ -277,8 +273,8 @@ class DatastoreDistributed():
     Returns:
       Key string for storing namespaces.
     """
-    return "{0}{4}{1}{5}{2}{5}{3}".format(app_id, name_space, kind, 
-      index_name, self._NAMESPACE_SEPARATOR, self._SEPARATOR)
+    return "{0}{4}{1}{5}{2}{5}{3}".format(app_id, name_space, kind, index_name, 
+      self._NAMESPACE_SEPARATOR, self._SEPARATOR)
 
   def get_table_prefix(self, data):
     """ Returns the namespace prefix for a query.
@@ -467,7 +463,7 @@ class DatastoreDistributed():
     """
 
     entities = sorted((self.get_table_prefix(x), x) for x in entities)
- 
+
     row_keys = []
     rev_row_keys = []
     row_values = {}
@@ -475,16 +471,16 @@ class DatastoreDistributed():
 
     for prefix, group in itertools.groupby(entities, lambda x: x[0]):
       group_rows = self.get_index_kv_from_tuple(group, False)
-      row_keys = [str(ii[0]) for ii in group_rows]
+      row_keys += [str(ii[0]) for ii in group_rows]
       for ii in group_rows:
         row_values[str(ii[0])] = {'reference': str(ii[1])}
  
     for prefix, group in itertools.groupby(entities, lambda x: x[0]):
       rev_group_rows = self.get_index_kv_from_tuple(group, True)
-      rev_row_keys = [str(ii[0]) for ii in rev_group_rows]
+      rev_row_keys += [str(ii[0]) for ii in rev_group_rows]
       for ii in rev_group_rows:
         rev_row_values[str(ii[0])] = {'reference': str(ii[1])}
-
+    
     # TODO  these in parallel
     self.datastore_batch.batch_put_entity(dbconstants.ASC_PROPERTY_TABLE, 
                           row_keys, 
@@ -710,13 +706,6 @@ class DatastoreDistributed():
     Raises:
       ZKTransactionException: If we are unable to acquire/release ZooKeeper locks.
     """
-    if app_id not in RESERVED_APP_IDS:
-      mapper = pb_mapper.PbMapper(app_id=app_id, dataset=app_id)
-      req = mapper.convert_blind_put_request(put_request)
-      response = mapper.send_blind_write(req)
-      mapper.convert_blind_put_response(put_request, response, put_response)
-      return
-
     entities = put_request.entity_list()
 
     num_of_required_ids = 0
@@ -1147,13 +1136,6 @@ class DatastoreDistributed():
     Raises:
       ZKTransactionException: If a lock was unable to get acquired.
     """ 
-    if app_id not in RESERVED_APP_IDS:
-      mapper = pb_mapper.PbMapper(app_id=app_id, dataset=app_id)
-      req = mapper.convert_get_request(get_request)
-      response = mapper.send_lookup(req)
-      mapper.convert_get_response(response, get_response)
-      return get_response
-
     keys = get_request.key_list()
     txnid = 0
     if get_request.has_transaction():
@@ -1182,12 +1164,6 @@ class DatastoreDistributed():
       app_id: The application ID.
       delete_request: Request with a list of keys.
     """
-    if app_id not in RESERVED_APP_IDS:
-      mapper = pb_mapper.PbMapper(app_id=app_id, dataset=app_id)
-      gcd_delete = mapper.convert_delete_request_to_blind_write(delete_request)
-      response = mapper.send_blind_write(gcd_delete)
-      return
-
     txn_hash = {}
     keys = delete_request.key_list()
     if not keys:
@@ -1266,8 +1242,8 @@ class DatastoreDistributed():
     if e.property_list():
       plist = e.property_list()
     else:   
-      rkey = "{0}{2}{1}".format(prefix, self.__encode_index_pb(e.key().path()),
-        self._SEPARATOR)
+      rkey = "{0}{2}{1}".format(prefix, 
+        self.__encode_index_pb(e.key().path()), self._SEPARATOR)
       ret = self.datastore_batch.batch_get_entity(dbconstants.APP_ENTITY_TABLE, 
         [rkey], dbconstants.APP_ENTITY_SCHEMA)
 
@@ -1351,8 +1327,8 @@ class DatastoreDistributed():
     """ 
     ancestor = query.ancestor()
     prefix = self.get_table_prefix(query)
-    path = buffer(prefix + self._SEPARATOR) + self.__encode_index_pb(
-      ancestor.path())
+    path = buffer(prefix + self._SEPARATOR) + \
+      self.__encode_index_pb(ancestor.path())
     txn_id = 0
     if query.has_transaction(): 
       txn_id = query.transaction().handle()   
@@ -1405,8 +1381,8 @@ class DatastoreDistributed():
     """       
     ancestor = query.ancestor()
     prefix = self.get_table_prefix(query)
-    path = buffer(prefix + self._SEPARATOR) + self.__encode_index_pb(
-      ancestor.path())
+    path = buffer(prefix + self._SEPARATOR) + \
+      self.__encode_index_pb(ancestor.path())
     txn_id = 0
     if query.has_transaction(): 
       txn_id = query.transaction().handle()   
@@ -1620,7 +1596,8 @@ class DatastoreDistributed():
     startrow = prefix + self._SEPARATOR + query.kind() + '!' + \
       str(ancestor_filter)
     endrow = prefix + self._SEPARATOR + query.kind() + '!' + \
-      str(ancestor_filter) + self._TERM_STRING
+      str(ancestor_filter) + \
+      self._TERM_STRING
     if '__key__' not in filter_info:
       return startrow, endrow, start_inclusive, end_inclusive
 
@@ -2001,8 +1978,8 @@ class DatastoreDistributed():
       return pname, pnames 
     property_name, property_names = set_prop_names(filter_info)
     if len(property_names) <= 1:
-      if not (len(property_names) == 1 and (query.has_ancestor() or \
-        query.has_kind())):
+      if not (len(property_names) == 1 and (query.has_ancestor() \
+        or query.has_kind())):
         return None
 
     if not property_name:
@@ -2104,8 +2081,8 @@ class DatastoreDistributed():
           A boolean of whether the specific entity was filtered or not. 
     """
     # Filter out kind if it does not match.
-    if query.has_kind() and query.kind() != e.key().path().\
-      element_list()[-1].type():
+    if query.has_kind() and query.kind() != \
+      e.key().path().element_list()[-1].type():
       filtered_entities.remove(ent)
       return True
 
@@ -2255,13 +2232,6 @@ class DatastoreDistributed():
       query: The query to run.
       query_result: The response given to the application server.
     """
-    if query.app() not in RESERVED_APP_IDS:
-      mapper = pb_mapper.PbMapper(app_id=query.app(), dataset=query.app())
-      req = mapper.convert_query_request(query)
-      response = mapper.send_query(req)
-      mapper.convert_query_response(response, query_result)
-      return
-
     result = self.__get_query_results(query)
     count = 0
     offset = query.offset()
@@ -2328,13 +2298,6 @@ class DatastoreDistributed():
     txn = datastore_pb.Transaction(http_request_data)
     logging.info("Doing a rollback on transaction id {0} for app id {1}"
       .format(txn.handle(), app_id))
-
-    if app_id not in RESERVED_APP_IDS:
-      mapper = pb_mapper.PbMapper(app_id=app_id, dataset=app_id)
-      req = mapper.convert_rollback_request(txn)
-      response = mapper.send_rollback_request(req)
-      return (api_base_pb.VoidProto().Encode(), 0, "")
-
     try:
       self.zookeeper.notify_failed_transaction(app_id, txn.handle())
       return (api_base_pb.VoidProto().Encode(), 0, "")
@@ -2499,18 +2462,8 @@ class MainHandler(tornado.web.RequestHandler):
       An encoded transaction protocol buffer with a unique handler.
     """
     global datastore_access
-
     begin_transaction_req_pb = datastore_pb.BeginTransactionRequest(
       http_request_data)
-
-    if app_id not in RESERVED_APP_IDS:
-      mapper = pb_mapper.PbMapper(app_id=app_id, dataset=app_id)
-      req = mapper.convert_begin_transaction_request(
-        begin_transaction_req_pb)
-      response = mapper.send_begin_transaction_request(req)
-      transaction_pb = mapper.convert_begin_transaction_response(response)
-      return (transaction_pb.Encode(), 0, "")
-
     multiple_eg = False
     if begin_transaction_req_pb.has_allow_multiple_eg():
       multiple_eg = begin_transaction_req_pb.allow_multiple_eg()

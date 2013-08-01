@@ -84,6 +84,14 @@ _MAX_ACTIONS_PER_TXN = 5
 # Google Cloud Datastore backend.
 _RESERVED_APP_IDS = ["appscaledashboard", "apichecker"]
 
+# Google service account for Google Cloud Datastore.
+DEFAULT_SERVICE_ACCOUNT = "399068749927-11atpdlu60fv73ip8jnhvftr3kt7kd8l@developer.gserviceaccount.com"
+
+# Google private key for Google Cloud Datastore.
+DEFAULT_PRIVATE_KEY_FILE = "/root/2574a2a5f891af1afb67c13de3be28648a46833f-privatekey.p12"
+
+# Default test GCD dataset.
+DEFAULT_DATASET = "quick-asset-252"
 
 class DatastoreDistributed(apiproxy_stub.APIProxyStub):
   """ A central server hooks up to a db and communicates via protocol 
@@ -133,9 +141,9 @@ class DatastoreDistributed(apiproxy_stub.APIProxyStub):
                require_indexes=False,
                service_name='datastore_v3',
                trusted=False,
-               private_key='',
-               email_account='',
-               dataset=''):
+               private_key=DEFAULT_PRIVATE_KEY_FILE,
+               email_account=DEFAULT_SERVICE_ACCOUNT,
+               dataset=DEFAULT_DATASET):
     """Constructor.
 
     Args:

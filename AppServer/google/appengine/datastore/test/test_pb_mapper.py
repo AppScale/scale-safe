@@ -5,16 +5,51 @@ import os
 import sys
 import unittest
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "../"))  
 import googledatastore
 from flexmock import flexmock
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../"))  
 import pb_mapper
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../../AppServer"))  
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../../../"))  
 from google.appengine.datastore import datastore_pb
 from google.appengine.datastore import entity_pb
 from google.appengine.ext import db
+
+def get_new_key(app_id, kind, entity_name, ns=""):
+  new_reference = entity_pb.Reference()  
+  new_reference.set_app(app_id)
+  new_reference.set_name_space(kind)
+
+  path = new_reference.mutable_path()
+  element = path.add_element()
+  element.set_type(kind)
+  element.set_name(entity_name)
+  return new_reference
+
+def get_new_entity_proto(app_id, kind, entity_name, prop_name, prop_value, ns=""):
+  entity_proto = datastore_pb.EntityProto()
+
+  reference = entity_proto.mutable_key()
+  reference.set_app(app_id)
+  reference.set_name_space(ns)
+
+  path = reference.mutable_path()
+  element = path.add_element()
+  element.set_type(kind)
+  element.set_name(entity_name)
+
+  ent_group = entity_proto.mutable_entity_group()
+  eg_element = ent_group.add_element()
+  eg_element.set_type(kind)
+  eg_element.set_name(entity_name)
+
+  prop = entity_proto.add_property()
+  prop.set_meaning(datastore_pb.Property.BYTESTRING)
+  prop.set_name(prop_name)
+  prop.set_multiple(1)
+  val = prop.mutable_value()
+  val.set_stringvalue(prop_value)
+  return entity_proto
 
 
 class TestPBMapper(unittest.TestCase):
@@ -261,5 +296,21 @@ class TestPBMapper(unittest.TestCase):
     gcd_rollback_req = mapper.convert_rollback_request(rollback_req)   
     self.assertTrue(isinstance(gcd_rollback_req, googledatastore.RollbackRequest))
 
+  def test_create_commit_request(self):
+    mapper = pb_mapper.PbMapper(app_id="app_id", dataset="dataset")
+    commit = datastore_pb.Transaction()
+    commit.set_handle("txnid")
+    ent1 = get_new_entity_proto("app_id", "kind", "entity_name", "prop_name", 
+      "prop_value", ns="")
+    ent2 = get_new_entity_proto("app_id", "kind", "entity_name1", "prop_name",
+      "prop_value", ns="")
+    put_list = [ent1, ent2]
+  
+    delete_key1 = get_new_key("app_id", "kind", "entity_name", ns='')
+    delete_key2 = get_new_key("app_id", "kind", "entity_name2", ns='')
+    delete_list = [delete_key1, delete_key2]
+    gcd_commit = mapper.create_commit_request(commit, put_list, delete_list)
+    self.assertEquals("txnid", gcd_commit.transaction)
+ 
 if __name__ == "__main__":
   unittest.main()    

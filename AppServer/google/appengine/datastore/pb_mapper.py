@@ -759,7 +759,7 @@ class PbMapper():
       A TypeError if paths are partial (neither id nor name for entity).
     """
     gcd_commit = googledatastore.CommitRequest()
-    gcd_commit.bytes = transaction.handle()
+    gcd_commit.transaction = transaction.handle()
     mutations = gcd_commit.mutation
 
     for entity in put_entities:
