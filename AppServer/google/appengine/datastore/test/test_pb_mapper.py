@@ -57,6 +57,10 @@ class TestPBMapper(unittest.TestCase):
   A set of test cases for the GAE datastore protocol buffers to Google 
   Cloud Datastore protocol buffers, and vice versa.
   """
+  def setUp(self):
+    flexmock(pb_mapper).should_receive('get_private_key').\
+      and_return("private_key")
+
   def test_init(self):
     googledatastore = flexmock()
     pb_mapper.PbMapper(app_id='app_id', dataset='dataset') 

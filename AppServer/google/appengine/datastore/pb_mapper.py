@@ -26,11 +26,13 @@ for mapping.
  
 """
 import googledatastore
-
+import OpenSSL
 from google.appengine.datastore import datastore_pb
 from google.appengine.datastore.entity_pb import Property
 
+import base64
 import logging
+import os
 import uuid
 
 class ValueType:
@@ -47,6 +49,19 @@ class ValueType:
   TEXT = 9
   BLOB_STRING = 10
 
+def get_private_key(private_key):
+  """ Reads in the private key and returns its contents.
+
+  Args:
+    private_key: A str of the location of the private key.
+  Returns:
+    A str, the contents of the private key file.
+  """
+  private_key_file = open(private_key, "rb")
+  private_key_data = private_key_file.read()
+  private_key_file.close()
+  return private_key_data
+
 class PbMapper():
   """ This class maps protocol buffers between Google App Engine
   datastore protocol buffers and Google Cloud Datastore protocol buffers. 
@@ -56,7 +71,7 @@ class PbMapper():
   # field is holding user information.
   GCD_USER = 20
 
-  def __init__(self, app_id="", dataset=""):
+  def __init__(self, app_id="", dataset="", service_email="", private_key=""):
     """ Constructs a new PbMapper instance. 
  
     Args:
@@ -64,7 +79,19 @@ class PbMapper():
       dataset: A str, the Google Cloud Datastore dataset identifier.
     """
     self.app_id = app_id
+    logging.info("Service email set to: %s" % service_email)
+    logging.info("Private key is at: %s" % private_key)
+    self.__service_email = service_email
+    self.__private_key = base64.b64encode(get_private_key(private_key))
+    self._set_environ()
     googledatastore.set_options(dataset=dataset)
+
+  def _set_environ(self):
+    """ Sets the environment variables required by the Google Cloud
+    Datastore client.
+    """
+    os.environ['DATASTORE_SERVICE_ACCOUNT'] = self.__service_email
+    os.environ['DATASTORE_PRIVATE_KEY_FILE'] = self.__private_key
 
   def get_property_value(self, prop):
     """ Gets the value of a property and its type.
@@ -117,6 +144,7 @@ class PbMapper():
     Returns:
       A Google Cloud Datastore BlindWrite response.
     """
+    self._set_environ()
     return googledatastore.blind_write(request)
 
   def set_properties(self, gcd_entity, property_list, is_raw=False):
@@ -337,6 +365,7 @@ class PbMapper():
     Returns:
       A Google Cloud Datastore LookupResponse. 
     """
+    self._set_environ()
     return googledatastore.lookup(request)
 
   def convert_get_request(self, request):
@@ -462,6 +491,7 @@ class PbMapper():
     Returns:
       A googledatastore.BeginTransactionResponse.
     """
+    self._set_environ()
     return googledatastore.begin_transaction(request)
 
   def convert_begin_transaction_response(self, response):
@@ -495,6 +525,7 @@ class PbMapper():
     Args:
       request: A googledatastore.RollbackRequest.
     """
+    self._set_environ()
     googledatastore.rollback(request)
 
   def fill_in_key(self, new_key, element_list):
@@ -604,6 +635,7 @@ class PbMapper():
     Returns:
       A Google Cloud Datastore QueryResults protcol buffer.
     """
+    self._set_environ()
     return googledatastore.run_query(request)
 
   def add_properties_to_entity_pb(self, new_entity, gcd_entity):
@@ -798,4 +830,5 @@ class PbMapper():
     Returns:
       A googledatastore.CommitResponse.
     """
+    self._set_environ()
     return googledatastore.commit(commit)

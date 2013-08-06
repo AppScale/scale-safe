@@ -15,6 +15,7 @@
 #
 """googledatastore helper."""
 
+import base64
 import calendar
 import datetime
 import logging
@@ -23,8 +24,8 @@ import os
 import httplib2
 from oauth2client import client
 from oauth2client import gce
-from googledatastore import connection
-from googledatastore.connection import datastore_v1_pb2
+import connection
+from connection import datastore_v1_pb2
 
 __all__ = [
     'get_credentials_from_env',
@@ -77,8 +78,16 @@ def get_credentials_from_env():
     # service account should be an admin of the datastore application.
     if (os.getenv('DATASTORE_SERVICE_ACCOUNT')
         and os.getenv('DATASTORE_PRIVATE_KEY_FILE')):
-      with open(os.getenv('DATASTORE_PRIVATE_KEY_FILE'), 'rb') as f:
-        key = f.read()
+      key = base64.b64decode(os.getenv('DATASTORE_PRIVATE_KEY_FILE'))
+      #logging.info("Key is set to: %s" % str(key))
+      #f = open(os.getenv('DATASTORE_PRIVATE_KEY_FILE'), 'rb')
+      #key = f.read()
+      #f.close()
+      import OpenSSL
+      #import pydoc
+      #logging.info("DOC STRING: %s" % client.__doc__)
+      #helpstr = pydoc.render_doc(client, "Help on %s")
+      #logging.info("HELP: %s" % helpstr)
       credentials = client.SignedJwtAssertionCredentials(
           os.getenv('DATASTORE_SERVICE_ACCOUNT'), key, connection.SCOPE)
       logging.info('connect using DatastoreSignedJwtCredentials')

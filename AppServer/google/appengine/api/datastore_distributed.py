@@ -198,7 +198,8 @@ class DatastoreDistributed(apiproxy_stub.APIProxyStub):
     self.__txn_delete_request = {}
 
     self.__mapper = pb_mapper.PbMapper(app_id=self.__app_id, 
-      dataset=self.__dataset)
+      dataset=self.__dataset, service_email=self.__email_account, 
+      private_key=self.__private_key)
 
   def Clear(self):
     """ Clears the datastore by deleting all currently stored entities and

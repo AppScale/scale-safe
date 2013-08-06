@@ -18,7 +18,7 @@
 import logging
 import httplib2
 
-from googledatastore import datastore_v1_pb2
+import datastore_v1_pb2
 __all__ = [
     'Datastore',
     'Error',

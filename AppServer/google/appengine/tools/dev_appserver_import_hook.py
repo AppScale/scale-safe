@@ -787,6 +787,7 @@ class HardenedModulesHook(object):
       'cmath',
       'collections',
       'crypt',
+      'crypto', # Added for oauth2client for GCD.
       'cStringIO',
       'datetime',
       'errno',
@@ -796,13 +797,16 @@ class HardenedModulesHook(object):
       'math',
       'md5',
       'operator',
+      'OpenSSL', # Added for oauth2client for GCD.
       'posix',
       'posixpath',
       'pyexpat',
+      'rand', # Added for oauth2client for GCD.
       'sha',
       'struct',
       'strxor',
       'sys',
+      'SSL', # Added for oauth2client for GCD.
       'time',
       'timing',
       'unicodedata',

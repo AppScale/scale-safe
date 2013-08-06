@@ -98,6 +98,11 @@ EXTRA_PATHS = [
   '/usr/local/lib/python2.7/site-packages',
   glob.glob('/usr/local/lib/python2.6/dist-packages/xmpppy-*-py2.6.egg')[0],
   '/usr/lib/pymodules/python2.6/',
+  '/usr/lib/python2.6/lib-dynload/',
+  '/usr/local/lib/python2.6/dist-packages/python_gflags-2.0-py2.6.egg',
+  '/usr/local/lib/python2.6/dist-packages/oauth2client-1.1-py2.6.egg',
+  '/usr/local/lib/python2.6/dist-packages/google_api_python_client-1.1-py2.6.egg',
+  '/usr/local/lib/python2.6/dist-packages/protobuf-2.5.0-py2.6.egg',
   glob.glob('/usr/local/lib/python2.6/dist-packages/termcolor-*-py2.6.egg')[0],
   glob.glob('/usr/local/lib/python2.6/dist-packages/lxml-*-py2.6-linux-x86_64.egg')[0],
 ]

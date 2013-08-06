@@ -16,9 +16,9 @@
 """googledatastore client."""
 import os
 
-from googledatastore import helper
-from googledatastore.connection import *
-from googledatastore.datastore_v1_pb2 import *
+import helper
+from connection import *
+from datastore_v1_pb2 import *
 
 
 _conn = None
