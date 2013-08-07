@@ -717,7 +717,12 @@ installprotobuf_fromsource()
     make install
     cd python
     python setup.py build
-    python setup.py install
+
+    # Copy library to the existing google directory in the PATH.    
+    DISTP=${APPSCALE_HOME}/appscale/AppServer/google/
+    mkdir -pv ${DISTP}
+    cp -r google/protobuf ${DISTP}
+
     cd ..
     cd ..
     rm -rv protobuf-${PROTOBUF_VER}

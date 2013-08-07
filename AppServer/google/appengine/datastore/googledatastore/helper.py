@@ -20,6 +20,7 @@ import calendar
 import datetime
 import logging
 import os
+import sys
 
 import httplib2
 from oauth2client import client
@@ -83,6 +84,7 @@ def get_credentials_from_env():
       #f = open(os.getenv('DATASTORE_PRIVATE_KEY_FILE'), 'rb')
       #key = f.read()
       #f.close()
+      sys.path.append(os.path.join("/root/appscale/AppServer/lib"))
       import OpenSSL
       #import pydoc
       #logging.info("DOC STRING: %s" % client.__doc__)

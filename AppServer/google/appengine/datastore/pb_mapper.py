@@ -26,7 +26,6 @@ for mapping.
  
 """
 import googledatastore
-import OpenSSL
 from google.appengine.datastore import datastore_pb
 from google.appengine.datastore.entity_pb import Property
 
