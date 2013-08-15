@@ -719,7 +719,7 @@ installprotobuf_fromsource()
     python setup.py build
 
     # Copy library to the existing google directory in the PATH.    
-    DISTP=${APPSCALE_HOME}/appscale/AppServer/google/
+    DISTP=${APPSCALE_HOME}/AppServer/google/
     mkdir -pv ${DISTP}
     cp -r google/protobuf ${DISTP}
 

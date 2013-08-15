@@ -23,6 +23,8 @@ import os
 import sys
 
 import httplib2
+
+sys.path.append(os.path.join("/usr/local/lib/python2.6/dist-packages/oauth2client-1.2-py2.6.egg"))
 from oauth2client import client
 from oauth2client import gce
 import connection
@@ -80,16 +82,13 @@ def get_credentials_from_env():
     if (os.getenv('DATASTORE_SERVICE_ACCOUNT')
         and os.getenv('DATASTORE_PRIVATE_KEY_FILE')):
       key = base64.b64decode(os.getenv('DATASTORE_PRIVATE_KEY_FILE'))
-      #logging.info("Key is set to: %s" % str(key))
+
+      # We cannot do file reads so we read the entire private key from 
+      # the environment instead.
       #f = open(os.getenv('DATASTORE_PRIVATE_KEY_FILE'), 'rb')
       #key = f.read()
       #f.close()
-      sys.path.append(os.path.join("/root/appscale/AppServer/lib"))
-      import OpenSSL
-      #import pydoc
-      #logging.info("DOC STRING: %s" % client.__doc__)
-      #helpstr = pydoc.render_doc(client, "Help on %s")
-      #logging.info("HELP: %s" % helpstr)
+
       credentials = client.SignedJwtAssertionCredentials(
           os.getenv('DATASTORE_SERVICE_ACCOUNT'), key, connection.SCOPE)
       logging.info('connect using DatastoreSignedJwtCredentials')

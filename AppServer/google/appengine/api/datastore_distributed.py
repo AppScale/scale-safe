@@ -392,7 +392,19 @@ class DatastoreDistributed(apiproxy_stub.APIProxyStub):
     Returns:
       True if the transaction exists, False otherwise.
     """
-    return txn_handle in self.__txn_requests
+    return handle in self.__txn_requests
+
+  def _handle_to_int(self, handle):
+    """ Maps a transaction handle from bytes to int.
+    
+    Args:
+      handle: A GCD transaction handle.
+    Returns:
+      An int representing the handle.
+    """
+    #TODO store the handle into __txn_requests
+    int_handle = random.randint(1, 1000000000)
+   
  
   def _Dynamic_Put(self, put_request, put_response):
     """Send a put request to the datastore server. """
@@ -605,8 +617,6 @@ class DatastoreDistributed(apiproxy_stub.APIProxyStub):
         return cmp(x_type, y_type)
 
     results = query_response.result_list()
-    results = [datastore.Entity._FromPb(r) for r in results]
-    results = [r._ToPb() for r in results]
     for result in results:
       old_datastore_stub_util.PrepareSpecialPropertiesForLoad(result)
 
@@ -674,16 +684,15 @@ class DatastoreDistributed(apiproxy_stub.APIProxyStub):
 
     req = self.__mapper.convert_begin_transaction_request(request)
     response = self.__mapper.send_begin_transaction_request(req)
-
-    if response.handle() in self.__txn_requests:
-      raise apiproxy_errors.ApplicationError(
-        datastore_pb.Error.BAD_REQUEST,
-        "Transaction %s already exists" % response.handle())
-
-    self.__txn_requests[response.handle()] = datetime.datetime.now()
-
     transaction.MergeFrom(self.__mapper.convert_begin_transaction_response(
       response))
+    if transaction.handle() in self.__txn_requests:
+      raise apiproxy_errors.ApplicationError(
+        datastore_pb.Error.BAD_REQUEST,
+        "Transaction %s already exists" % transaction.handle())
+
+    self.__txn_requests[transaction.handle()] = datetime.datetime.now()
+
     return transaction
 
   def _Dynamic_AddActions(self, request, _):

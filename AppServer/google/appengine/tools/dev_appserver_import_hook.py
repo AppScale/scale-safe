@@ -797,7 +797,6 @@ class HardenedModulesHook(object):
       'math',
       'md5',
       'operator',
-      'OpenSSL', # Added for oauth2client for GCD.
       'posix',
       'posixpath',
       'pyexpat',
@@ -911,7 +910,6 @@ class HardenedModulesHook(object):
       'umath_tests',
     ],
     'PIL': ['_imaging', '_imagingcms', '_imagingft', '_imagingmath'],
-
 
 
     'setuptools': [],
