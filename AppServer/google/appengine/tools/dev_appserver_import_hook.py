@@ -787,6 +787,7 @@ class HardenedModulesHook(object):
       'cmath',
       'collections',
       'crypt',
+      'crypto', # Added for oauth2client for GCD.
       'cStringIO',
       'datetime',
       'errno',
@@ -799,10 +800,12 @@ class HardenedModulesHook(object):
       'posix',
       'posixpath',
       'pyexpat',
+      'rand', # Added for oauth2client for GCD.
       'sha',
       'struct',
       'strxor',
       'sys',
+      'SSL', # Added for oauth2client for GCD.
       'time',
       'timing',
       'unicodedata',
@@ -907,7 +910,6 @@ class HardenedModulesHook(object):
       'umath_tests',
     ],
     'PIL': ['_imaging', '_imagingcms', '_imagingft', '_imagingmath'],
-
 
 
     'setuptools': [],

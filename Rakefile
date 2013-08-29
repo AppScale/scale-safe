@@ -82,7 +82,9 @@ namespace :appserver do
 
   task :test do
     sh "nosetests AppServer/google/appengine/api/taskqueue/test " +
-      "AppServer/google/appengine/api/xmpp/test"
+      "AppServer/google/appengine/api/xmpp/test " + 
+      "AppServer/google/appengine/datastore/test " +
+      "AppServer/google/appengine/api/test "
   end
 
 end

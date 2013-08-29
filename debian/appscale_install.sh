@@ -19,6 +19,7 @@ case "$1" in
 	installgems
 	postinstallgems
         installsetuptools
+        installsimplejson
 	installhaproxy
 	postinstallhaproxy
 	installnginx
@@ -37,8 +38,7 @@ case "$1" in
 	postinstallthrift_fromsource
         installtornado
         postinstalltornado
-	installprotobuf
-	postinstallprotobuf
+        installprotobuf_fromsource
         installflexmock
         installnose
 	installzookeeper
@@ -57,14 +57,12 @@ case "$1" in
 	installcassandra
 	postinstallcassandra
 	;;
-        # for test only. this should be included in core and all.
     zookeeper)
 	installzookeeper
 	postinstallzookeeper
 	;;
     protobuf-src)
 	installprotobuf_fromsource
-	postinstallprotobuf
 	;;
     rabbit-mq)
         installrabbitmq
@@ -80,6 +78,7 @@ case "$1" in
 	installgems
 	postinstallgems
         installsetuptools
+        installsimplejson
 	installhaproxy
 	postinstallhaproxy
 	installnginx

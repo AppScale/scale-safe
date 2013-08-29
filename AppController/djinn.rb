@@ -518,7 +518,7 @@ class Djinn
         ApiChecker.stop 
       end
 
-      maybe_stop_taskqueue_worker("apichecker")
+      #maybe_stop_taskqueue_worker("apichecker")
       maybe_stop_taskqueue_worker(AppDashboard::APP_NAME)
 
       jobs_to_run = my_node.jobs
@@ -2146,6 +2146,7 @@ class Djinn
   #   A JSON-encoded Hash that maps each API name to its state (e.g., running,
   #   failed).
   def generate_api_status()
+    return
     if my_node.is_appengine?
       apichecker_host = my_node.private_ip
     else
@@ -2671,15 +2672,15 @@ class Djinn
     # since apichecker does health checks on the app engine apis, 
     # start it up there.
 
-    apichecker_ip = get_shadow.public_ip
-    apichecker_private_ip = get_shadow.private_ip
-    apichecker_ip = my_node.public_ip if my_node.is_appengine?
-    apichecker_private_ip = my_node.private_ip if my_node.is_appengine?
-    ApiChecker.init(apichecker_ip, apichecker_private_ip,  @@secret)
+    #apichecker_ip = get_shadow.public_ip
+    #apichecker_private_ip = get_shadow.private_ip
+    #apichecker_ip = my_node.public_ip if my_node.is_appengine?
+    #apichecker_private_ip = my_node.private_ip if my_node.is_appengine?
+    #ApiChecker.init(apichecker_ip, apichecker_private_ip,  @@secret)
 
-    if my_node.is_shadow? or my_node.is_appengine?
-      ApiChecker.start(get_login.public_ip, @userappserver_private_ip)
-    end
+    #if my_node.is_shadow? or my_node.is_appengine?
+    #  ApiChecker.start(get_login.public_ip, @userappserver_private_ip)
+    #end
 
     # Start the AppDashboard.
     if my_node.is_login?
@@ -2694,7 +2695,7 @@ class Djinn
     CronHelper.update_cron(get_login.public_ip, AppDashboard::LISTEN_PORT,
       AppDashboard::APP_LANGUAGE, AppDashboard::APP_NAME)
 
-    maybe_start_taskqueue_worker("apichecker")
+    #maybe_start_taskqueue_worker("apichecker")
 
     if my_node.is_login?
       TaskQueue.start_flower()

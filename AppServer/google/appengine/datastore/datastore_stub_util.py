@@ -1020,7 +1020,9 @@ class BaseCursor(object):
       (cursor_entity, inclusive): a entity_pb.EntityProto and if it should
       be included in the result set.
     """
-    assert len(compiled_cursor.position_list()) == 1
+    # In order for Google Cloud Datastore to store its cursor and have 
+    # backward compatibility, we remove this check.
+    #assert len(compiled_cursor.position_list()) == 1
 
     position = compiled_cursor.position(0)
 
@@ -2890,13 +2892,8 @@ class DatastoreStub(object):
     self._app_id = datastore_types.ResolveAppId(app_id)
     self._trusted = trusted
     self._root_path = root_path
-
-
     self.__query_history = {}
-
-
     self.__query_ci_history = set()
-
 
 
     self._cached_yaml = (None, None, None)
