@@ -26,7 +26,7 @@ case "$1" in
 	postinstallnginx
         installpython27
         installnumpy
-        installmatplotlib
+        installpythonmemcache
         installPIL
         installpycrypto
         installlxml
@@ -34,8 +34,6 @@ case "$1" in
 	installjavajdk
         installappserverjava
         postinstallappserverjava
-        installmonitoring
-	postinstallmonitoring
 	installthrift_fromsource
 	postinstallthrift_fromsource
         installtornado
@@ -43,8 +41,6 @@ case "$1" in
         installprotobuf_fromsource
         installflexmock
         installnose
-	installhadoop
-	postinstallhadoop
 	installzookeeper
 	postinstallzookeeper
         installrabbitmq
@@ -53,7 +49,6 @@ case "$1" in
 	installservice
 	postinstallservice
 	setupntpcron
-        updatealternatives
 	sethosts
         setulimits
         increaseconnections
@@ -62,14 +57,6 @@ case "$1" in
 	installcassandra
 	postinstallcassandra
 	;;
-    hbase)
-	installhbase
-	postinstallhbase
-	;;
-    hypertable)
-	installhypertable
-	postinstallhypertable
-	;;
     googleclouddatastore)
         installgoogleclouddatastore
         ;;
@@ -77,10 +64,6 @@ case "$1" in
     zookeeper)
 	installzookeeper
 	postinstallzookeeper
-	;;
-    hadoop)
-	installhadoop
-	postinstallhadoop
 	;;
     protobuf-src)
 	installprotobuf_fromsource
@@ -106,7 +89,7 @@ case "$1" in
 	postinstallnginx
         installpython27
         installnumpy
-        installmatplotlib
+        installpythonmemcache
         installPIL
         installpycrypto
         installlxml
@@ -114,31 +97,22 @@ case "$1" in
 	installjavajdk
         installappserverjava
         postinstallappserverjava
-        installmonitoring
-	postinstallmonitoring
 	installthrift_fromsource
 	postinstallthrift_fromsource
         installtornado
         installflexmock
         installnose
         postinstalltornado
-	installhadoop
-	postinstallhadoop
 	installzookeeper
 	postinstallzookeeper
         installcassandra
 	postinstallcassandra
-	installhbase
-	postinstallhbase
-	installhypertable
-	postinstallhypertable
         installrabbitmq
         postinstallrabbitmq
         installgoogleclouddatastore
         installcelery
 	installservice
 	postinstallservice
-	updatealternatives
 	setupntpcron
         sethosts
         setulimits
