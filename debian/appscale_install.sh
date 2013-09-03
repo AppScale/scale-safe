@@ -45,6 +45,7 @@ case "$1" in
 	postinstallzookeeper
         installrabbitmq
         postinstallrabbitmq
+        installgoogleclouddatastore
         installcelery
 	installservice
 	postinstallservice
@@ -100,6 +101,7 @@ case "$1" in
 	installthrift_fromsource
 	postinstallthrift_fromsource
         installtornado
+        installprotobuf_fromsource
         installflexmock
         installnose
         postinstalltornado

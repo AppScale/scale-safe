@@ -462,16 +462,20 @@ installprotobuf_fromsource()
     wget ${APPSCALE_PACKAGE_MIRROR}/protobuf-${PROTOBUF_VER}.tar.gz
     tar zxvf protobuf-${PROTOBUF_VER}.tar.gz
     rm -v protobuf-${PROTOBUF_VER}.tar.gz
-    cd protobuf-${PROTOBUF_VER}
+    pushd protobuf-${PROTOBUF_VER}
     ./configure --prefix=/usr
     make install
     pushd python
 # protobuf could not be installed in the different root
+    python setup.py build
+    python setup.py install
     python setup.py bdist_egg
 # copy the egg file
-    DISTP=${DESTDIR}/usr/local/lib/python2.6/dist-packages
+   
+    DISTP=${APPSCALE_HOME}/AppServer/google/protobuf
     mkdir -pv ${DISTP}
     cp -v dist/protobuf-*.egg ${DISTP}
+
     popd
     popd
     rm -rv protobuf-${PROTOBUF_VER}
@@ -633,6 +637,7 @@ installcelery()
 
 installsimplejson()
 {
+  apt-get remove -y python-simplejson
   SIMPLE_JSON_VERSION=2.5.0
   wget ${APPSCALE_PACKAGE_MIRROR}/simplejson-${SIMPLE_JSON_VERSION}.tar.gz
   mkdir -pv ${APPSCALE_HOME}/downloads
