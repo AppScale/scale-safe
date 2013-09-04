@@ -45,6 +45,7 @@ case "$1" in
 	postinstallzookeeper
         installrabbitmq
         postinstallrabbitmq
+        installpyopenssl
         installgoogleclouddatastore
         installcelery
 	installservice
@@ -111,6 +112,7 @@ case "$1" in
 	postinstallcassandra
         installrabbitmq
         postinstallrabbitmq
+        installpyopenssl
         installgoogleclouddatastore
         installcelery
 	installservice

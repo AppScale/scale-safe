@@ -481,9 +481,21 @@ installprotobuf_fromsource()
     rm -rv protobuf-${PROTOBUF_VER}
 }
 
+installpyopenssl()
+{
+    mkdir -pv ${APPSCALE_HOME}/downloads
+    cd ${APPSCALE_HOME}/downloads
+    wget https://pypi.python.org/packages/source/p/pyOpenSSL/pyOpenSSL-0.13.tar.gz#md5=767bca18a71178ca353dff9e10941929 --no-check-certificate
+    tar zxvf pyOpenSSL-0.13.tar.gz
+    cd pyOpenSSL-0.13
+    python setup.py install
+    cd ..
+    rm pyOpenSSL-0.13
+    rm pyOpenSSL-0.13.tar.gz
+}
+
 installgoogleclouddatastore()
 {
-    pip install pyopenssl
     pip install googledatastore
     :;
 }
