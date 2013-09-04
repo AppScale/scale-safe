@@ -497,7 +497,7 @@ installpyopenssl()
 installgoogleclouddatastore()
 {
     # Remove the conflicting version of httplib2.
-    apt-get remove python-httplib2
+    apt-get remove -y python-httplib2
 
     pip install googledatastore
     :;
