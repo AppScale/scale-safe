@@ -2904,7 +2904,12 @@ class MainHandler(tornado.web.RequestHandler):
       return (putresp_pb.Encode(), 
               datastore_pb.Error.CONCURRENT_TRANSACTION, 
               "Concurrent transaction exception on put.")
-      
+    except apiproxy_errors.ApplicationError, e:
+      logging.error(e.message)
+      return (putresp_pb.Encode(),
+              e.application_error,
+              e.error_detail)
+  
     return (putresp_pb.Encode(), 0, "")
     
   def get_request(self, app_id, http_request_data):
@@ -2961,6 +2966,12 @@ class MainHandler(tornado.web.RequestHandler):
       return (delresp_pb.Encode(), 
               datastore_pb.Error.CONCURRENT_TRANSACTION, 
               "Concurrent transaction exception on delete.")
+    except apiproxy_errors.ApplicationError, e:
+      logging.error(e.message)
+      return (putresp_pb.Encode(),
+              e.application_error,
+              e.error_detail)
+ 
     return (delresp_pb.Encode(), 0, "")
 
 def usage():

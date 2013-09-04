@@ -57,6 +57,13 @@ class PbMapper():
   # field is holding user information.
   GCD_USER = 20
 
+  # Permissions for accessing GCD data.
+  READ_ONLY = "READ_ONLY"
+  READ_WRITE = "READ_WRITE"
+
+  # GCD database permissions environment variable.
+  GCD_DB_PERMISSIONS = "GCD_DB_PERMISSIONS"
+
   def __init__(self, app_id="", dataset="", service_email="", private_key=""):
     """ Constructs a new PbMapper instance. 
  
@@ -65,7 +72,8 @@ class PbMapper():
       dataset: A str, the Google Cloud Datastore dataset identifier.
     """
     self.app_id = app_id
-
+    self.gcd_permissions = self._get_gcd_permissions()
+     
     if service_email and private_key:
       logging.info("Service email set to: %s" % service_email)
       logging.info("Private key is at: %s" % private_key)
@@ -74,6 +82,14 @@ class PbMapper():
       self._set_environ()
 
     googledatastore.set_options(dataset=dataset)
+
+  def _get_gcd_permissions(self):
+    """ Gets from the environment the permissions to use.
+
+    Returns:
+      A string telling whether we're in READ ONLY mode or READ WRITE mode
+    """
+    return os.environ.get(self.GCD_DB_PERMISSIONS, self.READ_ONLY)
 
   def _set_environ(self):
     """ Sets the environment variables required by the Google Cloud
@@ -132,7 +148,12 @@ class PbMapper():
       request: A Google Cloud Datastore BlindWrite request.
     Returns:
       A Google Cloud Datastore BlindWrite response.
+    Raises:
+      datastore_pb.Error.CAPABILTIY_DISABLED if in read only mode.
     """
+    if self.gcd_permissions == self.READ_ONLY:
+      raise apiproxy_errors.ApplicationError(
+        datastore_pb.Error.CAPABILITY_DISABLED, "In read only mode")
     return googledatastore.blind_write(request)
 
   def set_properties(self, gcd_entity, property_list, is_raw=False):

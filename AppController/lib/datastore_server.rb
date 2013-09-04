@@ -45,6 +45,11 @@ module DatastoreServer
   # Google private key for Google Cloud Datastore.
   PRIVATE_KEY_FILE = "/root/2574a2a5f891af1afb67c13de3be28648a46833f-privatekey.p12"
 
+  # We have two modes of operation for Google Cloud Datastore, 
+  # read only mode and read/write mode.
+  READ_ONLY = 'READ_ONLY'
+  READ_WRITE = 'READ_WRITE'
+
   # Starts a Datastore Server on this machine. We don't want to monitor
   # it ourselves, so just tell god to start it and watch it.
   def self.start(master_ip, db_local_ip, my_ip, table, zklocations)
@@ -56,7 +61,8 @@ module DatastoreServer
       "MASTER_IP" => master_ip, 
       "LOCAL_DB_IP" => db_local_ip,
       "DATASTORE_SERVICE_ACCOUNT" => SERVICE_ACCOUNT,
-      "DATASTORE_PRIVATE_KEY_FILE" => PRIVATE_KEY_FILE
+      "DATASTORE_PRIVATE_KEY_FILE" => PRIVATE_KEY_FILE,
+      "GCD_DB_PERMISSIONS" => READ_WRITE
     }
   
     ports.each { |port|
