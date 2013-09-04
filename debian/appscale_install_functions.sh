@@ -490,8 +490,8 @@ installpyopenssl()
     cd pyOpenSSL-0.13
     python setup.py install
     cd ..
-    rm pyOpenSSL-0.13
-    rm pyOpenSSL-0.13.tar.gz
+    rm -fdr pyOpenSSL-0.13
+    rm -fdr pyOpenSSL-0.13.tar.gz
 }
 
 installgoogleclouddatastore()
