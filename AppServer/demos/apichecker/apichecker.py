@@ -6,7 +6,10 @@ import logging
 import webapp2
 import uuid 
 
-from django.utils import simplejson as json
+try:
+  import json
+except ImportError:
+  import simplejson as json
 
 from google.appengine.ext import blobstore
 from google.appengine.ext import db

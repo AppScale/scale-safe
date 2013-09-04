@@ -26,11 +26,12 @@ for mapping.
  
 """
 import googledatastore
-
 from google.appengine.datastore import datastore_pb
 from google.appengine.datastore.entity_pb import Property
 
+import base64
 import logging
+import os
 import uuid
 
 class ValueType:
@@ -56,7 +57,7 @@ class PbMapper():
   # field is holding user information.
   GCD_USER = 20
 
-  def __init__(self, app_id="", dataset=""):
+  def __init__(self, app_id="", dataset="", service_email="", private_key=""):
     """ Constructs a new PbMapper instance. 
  
     Args:
@@ -64,7 +65,22 @@ class PbMapper():
       dataset: A str, the Google Cloud Datastore dataset identifier.
     """
     self.app_id = app_id
+
+    if service_email and private_key:
+      logging.info("Service email set to: %s" % service_email)
+      logging.info("Private key is at: %s" % private_key)
+      self.__service_email = service_email
+      self.__private_key = private_key
+      self._set_environ()
+
     googledatastore.set_options(dataset=dataset)
+
+  def _set_environ(self):
+    """ Sets the environment variables required by the Google Cloud
+    Datastore client.
+    """
+    os.environ['DATASTORE_SERVICE_ACCOUNT'] = self.__service_email
+    os.environ['DATASTORE_PRIVATE_KEY_FILE'] = self.__private_key
 
   def get_property_value(self, prop):
     """ Gets the value of a property and its type.
@@ -349,6 +365,11 @@ class PbMapper():
       A Google Cloud Datastore lookup protocol message.
     """
     gcd_lookup = googledatastore.LookupRequest()
+
+    if request.has_transaction():
+      gcd_lookup.read_options.transaction = \
+        request.transaction().handle()
+
     for key in request.key_list():
       new_key = gcd_lookup.key.add()
       for element in key.path().element_list():
@@ -491,18 +512,6 @@ class PbMapper():
       request: A googledatastore.RollbackRequest.
     """
     googledatastore.rollback(request)
-
-  def convert_commit_transaction_request(self, request):
-    """ Converts a datastore_pb.CommitTransactionRequest to a Google Cloud 
-    Datastore commit request.
-    """
-    raise NotImplementedError()
-  
-  def convert_commit_transaction_response(self, response):
-    """ Converts a Google Cloud Datastore commit response to a
-    datastore_pb.CommitResponse.
-    """
-    raise NotImplementedError()
 
   def fill_in_key(self, new_key, element_list):
     """ Fills in key with a path element list.
@@ -746,22 +755,63 @@ class PbMapper():
     allocate ids request.
    
     Args:
-      request: A dastore_pb.AllocateIdsRequest.
+      request: A datastore_pb.AllocateIdsRequest.
     Returns:
       A Google Cloud Datastore AllocateIdsRequest converted over from
       a Google App Engine allocate ID request.
     """
     raise NotImplementedError()
 
-  def convert_put_request(self):
-    """ Converts a datastore_pb.PutRequest to a Google Cloud Datastore
-    transactional update request.
+  def create_commit_request(self, transaction, put_entities, delete_keys):
+    """ Creates a commit request to be sent to Google Cloud Datastore.
+
+    Args:
+      request: A datastore_pb.Transaction.
+      put_entities: A list of entity_pb.EntityProtos.
+      delete_keys: A list of entity_pb.References.
+    Returns:
+      A googledatastore.CommitRequest.
+    Raise:
+      A TypeError if paths are partial (neither id nor name for entity).
     """
-    raise NotImplementedError()
+    gcd_commit = googledatastore.CommitRequest()
+    gcd_commit.transaction = transaction.handle()
+    mutations = gcd_commit.mutation
 
-  def convert_put_response(self): 
-    """ Converts a Google Cloud Datastore transactional response to a 
-      datastore_pb.PutResponse.  
-    """ 
-    raise NotImplementedError() 
+    for entity in put_entities:
+      gcd_entity = None
+      # Before we build the path we must first know if the full path
+      # is already set, or if we need to auto assign an ID for this
+      # new entity.
+      last_path = entity.key().path().element_list()[-1]
+      if not last_path.has_name() and last_path.id() == 0:
+        raise TypeError("Element has neither a name or ID")
 
+      gcd_entity = mutations.upsert.add()
+      # Loop through the ancestors (element) of this entity's path.
+      for element in entity.key().path().element_list():
+        path_element = gcd_entity.key.path_element.add()
+        path_element.kind = element.type()
+        if element.has_name():
+          path_element.name = element.name()
+        elif element.id() != 0:
+          path_element.id = element.id() 
+
+      self.set_properties(gcd_entity, entity.property_list(), is_raw=False)
+      self.set_properties(gcd_entity, entity.raw_property_list(), is_raw=True)
+     
+    for key in delete_keys:
+      new_delete = mutations.delete.add()
+      self.fill_in_key(new_delete, key.path().element_list())
+
+    return gcd_commit
+
+  def send_commit(self, commit):
+    """ Sends a commit message to Google Cloud Datastore.
+
+    Args:
+      commit: A googledatastore.CommitRequest.
+    Returns:
+      A googledatastore.CommitResponse.
+    """
+    return googledatastore.commit(commit)

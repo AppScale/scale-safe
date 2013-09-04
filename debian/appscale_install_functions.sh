@@ -467,8 +467,11 @@ installprotobuf_fromsource()
     make install
     pushd python
 # protobuf could not be installed in the different root
+<<<<<<< HEAD
     python setup.py build
     python setup.py install
+=======
+>>>>>>> ccc9f273d2acf0c4ac093ae19e0c3c97873f2409
     python setup.py bdist_egg
 # copy the egg file
    
@@ -481,6 +484,7 @@ installprotobuf_fromsource()
     rm -rv protobuf-${PROTOBUF_VER}
 }
 
+<<<<<<< HEAD
 installpyopenssl()
 {
     mkdir -pv ${APPSCALE_HOME}/downloads
@@ -500,6 +504,19 @@ installgoogleclouddatastore()
     apt-get remove -y python-httplib2
 
     pip install googledatastore
+=======
+installprotobuf()
+{
+# make protobuf module loadable
+# this is not needed when we use egg to install protobuf.
+    mkdir -pv ${APPSCALE_HOME}/AppServer/google
+    # this should be absolute path of runtime.
+    ln -sfv /var/lib/python-support/python2.6/google/protobuf ${APPSCALE_HOME}/AppServer/google/
+}
+
+postinstallprotobuf()
+{
+>>>>>>> ccc9f273d2acf0c4ac093ae19e0c3c97873f2409
     :;
 }
 
