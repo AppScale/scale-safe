@@ -496,6 +496,9 @@ installpyopenssl()
 
 installgoogleclouddatastore()
 {
+    # Remove the conflicting version of httplib2.
+    apt-get remove python-httplib2
+
     pip install googledatastore
     :;
 }
@@ -649,7 +652,9 @@ installcelery()
 
 installsimplejson()
 {
+  # Remove older default version of simplejson.
   apt-get remove -y python-simplejson
+
   SIMPLE_JSON_VERSION=2.5.0
   wget ${APPSCALE_PACKAGE_MIRROR}/simplejson-${SIMPLE_JSON_VERSION}.tar.gz
   mkdir -pv ${APPSCALE_HOME}/downloads
