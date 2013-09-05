@@ -2497,10 +2497,12 @@ class DatastoreDistributed():
       query_result: The response given to the application server.
     """
     if query.app() not in RESERVED_APP_IDS:
+      logging.error("Query: {0}".format(query))
       mapper = pb_mapper.PbMapper(app_id=query.app(), dataset=query.app())
       req = mapper.convert_query_request(query)
       response = mapper.send_query(req)
       mapper.convert_query_response(response, query_result)
+      logging.error("Result: {0}".format(query_result))
       return
 
     result = self.__get_query_results(query)

@@ -28,7 +28,7 @@ for mapping.
 import googledatastore
 from google.appengine.datastore import datastore_pb
 from google.appengine.datastore.entity_pb import Property
-
+from google.appengine.runtime import apiproxy_errors
 import base64
 import logging
 import os
@@ -87,9 +87,10 @@ class PbMapper():
     """ Gets from the environment the permissions to use.
 
     Returns:
-      A string telling whether we're in READ ONLY mode or READ WRITE mode
+      A string telling whether we're in READ ONLY mode or READ WRITE mode.
+      By default it is READ/WRITE.
     """
-    return os.environ.get(self.GCD_DB_PERMISSIONS, self.READ_ONLY)
+    return os.environ.get(self.GCD_DB_PERMISSIONS, self.READ_WRITE)
 
   def _set_environ(self):
     """ Sets the environment variables required by the Google Cloud
@@ -387,9 +388,10 @@ class PbMapper():
     """
     gcd_lookup = googledatastore.LookupRequest()
 
-    if request.has_transaction():
-      gcd_lookup.read_options.transaction = \
-        request.transaction().handle()
+    # TODO implement transactions.
+    #if request.has_transaction():
+    #  gcd_lookup.read_options.transaction = \
+    #    request.transaction().handle()
 
     for key in request.key_list():
       new_key = gcd_lookup.key.add()
@@ -561,9 +563,10 @@ class PbMapper():
     gcd_run_query_request = googledatastore.RunQueryRequest()
     gcd_query = gcd_run_query_request.query
 
-    if request.has_transaction():
-      gcd_run_query_request.read_options.transaction = \
-        request.transaction().handle()
+    #TODO implement transactions.
+    #if request.has_transaction():
+    #  gcd_run_query_request.read_options.transaction = \
+    #    request.transaction().handle()
 
     #TODO projection queries
     if request.has_kind():
