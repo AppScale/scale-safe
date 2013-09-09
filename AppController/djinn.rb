@@ -1,6 +1,7 @@
 #!/usr/bin/ruby -w
 
 # Imports within Ruby's standard libraries
+require 'base64'
 require 'logger'
 require 'monitor'
 require 'net/http'
@@ -2929,6 +2930,31 @@ class Djinn
     GodInterface.start(:uaserver, start_cmd, stop_cmd, port, env_vars)
   end 
 
+  # Outputs Google Cloud Datastore credentials to the file system.
+  def write_gcd_creds_to_disk
+    if !@creds["gcd_private_key"].nil?
+      private_key_decoded = Base64.decode64(@creds["gcd_private_key"])
+      File.open("/etc/appscale/gcd_private.key", "w"){ 
+        # We add \000 because the decode loses it ruby.
+        |file| file.write(private_key_decoded + "\000") 
+      }
+    end
+
+    if !@creds["gcd_service_email"].nil?
+      gcd_service_email = @creds["gcd_service_email"]
+      File.open("/etc/appscale/gcd_service_email", "w"){ 
+        |file| file.write(gcd_service_email) 
+      }
+    end
+
+    if !@creds["gcd_dataset_id"].nil?
+      gcd_dataset_id = @creds["gcd_dataset_id"]
+      File.open("/etc/appscale/gcd_dataset_id", "w"){ 
+        |file| file.write(gcd_dataset_id) 
+      }
+    end
+  end
+
   def start_datastore_server
     db_master_ip = nil
     my_ip = my_node.public_ip
@@ -2936,6 +2962,8 @@ class Djinn
       db_master_ip = node.private_ip if node.is_db_master?
     }
     HelperFunctions.log_and_crash("db master ip was nil") if db_master_ip.nil?
+
+    write_gcd_creds_to_disk
 
     table = @creds['table']
     zoo_connection = get_zk_connection_string(@nodes)

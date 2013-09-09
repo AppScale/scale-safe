@@ -39,11 +39,14 @@ module DatastoreServer
   # datastore servers to this value.
   DEFAULT_NUM_SERVERS = 3
 
-  # Google service account for Google Cloud Datastore.
-  SERVICE_ACCOUNT = "399068749927-11atpdlu60fv73ip8jnhvftr3kt7kd8l@developer.gserviceaccount.com"
+  # Location of the file that contains the service account for Google Cloud Datastore.
+  SERVICE_ACCOUNT = "/etc/appscale/gcd_service_email"
 
-  # Google private key for Google Cloud Datastore.
-  PRIVATE_KEY_FILE = "/root/2574a2a5f891af1afb67c13de3be28648a46833f-privatekey.p12"
+  # Location of the Google private key for Google Cloud Datastore.
+  PRIVATE_KEY_FILE = "/etc/appscale/gcd_private.key"
+
+  # Location of Google Cloud Datastore dataset ID.
+  DATASET_ID_FILE = "/etc/appscale/gcd_dataset_id"
 
   # We have two modes of operation for Google Cloud Datastore, 
   # read only mode and read/write mode.
@@ -55,12 +58,14 @@ module DatastoreServer
   def self.start(master_ip, db_local_ip, my_ip, table, zklocations)
     datastore_server = self.get_executable_name(table)
     ports = self.get_server_ports(table)
-
+    email = HelperFunctions.read_file(SERVICE_ACCOUNT)
+    dataset_id = HelperFunctions.read_file(DATASET_ID_FILE) 
     env_vars = { 
       'APPSCALE_HOME' => APPSCALE_HOME,
       "MASTER_IP" => master_ip, 
       "LOCAL_DB_IP" => db_local_ip,
-      "DATASTORE_SERVICE_ACCOUNT" => SERVICE_ACCOUNT,
+      "DATASET_ID" => dataset_id,
+      "DATASTORE_SERVICE_ACCOUNT" => email, 
       "DATASTORE_PRIVATE_KEY_FILE" => PRIVATE_KEY_FILE,
       "GCD_DB_PERMISSIONS" => READ_WRITE
     }

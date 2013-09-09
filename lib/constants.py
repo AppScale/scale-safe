@@ -72,3 +72,5 @@ API_CHECKER_ID = "apichecker"
 # Reserved application identifiers which are only internal for AppScale.
 RESERVED_APP_IDS = [DASHBOARD_APP_ID, API_CHECKER_ID]
 
+# Google Cloud Datastore identifier file.
+GCD_DATASET_ID_FILE = "/etc/appscale/gcd_dataset_id"

@@ -106,3 +106,11 @@ def get_db_master_ip():
     A str, the IP of the datastore master.
   """
   return file_io.read(constants.MASTERS_FILE_LOC) 
+
+def get_gcd_dataset_id():
+  """ Returns the Google Cloud Datastore ID.
+  
+  Returns:
+    A str, the dataset identifier for Google Cloud Datastore.
+  """
+  return file_io.read(constants.GCD_DATASET_ID_FILE)

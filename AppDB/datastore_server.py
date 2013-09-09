@@ -146,6 +146,9 @@ class DatastoreDistributed():
     # zookeeper instance for accesing ZK functionality.
     self.zookeeper = zookeeper
 
+    # Get Google Cloud Datastore dataset ID.
+    self.dataset_id = appscale_info.get_gcd_dataset_id()
+
   @staticmethod
   def get_entity_kind(key_path):
     """ Returns the Kind of the Entity. A Kind is like a type or a 
@@ -711,7 +714,7 @@ class DatastoreDistributed():
       ZKTransactionException: If we are unable to acquire/release ZooKeeper locks.
     """
     if app_id not in RESERVED_APP_IDS:
-      mapper = pb_mapper.PbMapper(app_id=app_id, dataset=app_id)
+      mapper = pb_mapper.PbMapper(app_id=app_id, dataset=self.dataset_id)
       req = mapper.convert_blind_put_request(put_request)
       response = mapper.send_blind_write(req)
       mapper.convert_blind_put_response(put_request, response, put_response)
@@ -1148,7 +1151,7 @@ class DatastoreDistributed():
       ZKTransactionException: If a lock was unable to get acquired.
     """ 
     if app_id not in RESERVED_APP_IDS:
-      mapper = pb_mapper.PbMapper(app_id=app_id, dataset=app_id)
+      mapper = pb_mapper.PbMapper(app_id=app_id, dataset=self.dataset_id)
       req = mapper.convert_get_request(get_request)
       response = mapper.send_lookup(req)
       mapper.convert_get_response(response, get_response)
@@ -1183,7 +1186,7 @@ class DatastoreDistributed():
       delete_request: Request with a list of keys.
     """
     if app_id not in RESERVED_APP_IDS:
-      mapper = pb_mapper.PbMapper(app_id=app_id, dataset=app_id)
+      mapper = pb_mapper.PbMapper(app_id=app_id, dataset=self.dataset_id)
       gcd_delete = mapper.convert_delete_request_to_blind_write(delete_request)
       response = mapper.send_blind_write(gcd_delete)
       return
@@ -2497,12 +2500,10 @@ class DatastoreDistributed():
       query_result: The response given to the application server.
     """
     if query.app() not in RESERVED_APP_IDS:
-      logging.error("Query: {0}".format(query))
-      mapper = pb_mapper.PbMapper(app_id=query.app(), dataset=query.app())
+      mapper = pb_mapper.PbMapper(app_id=query.app(), dataset=self.dataset_id)
       req = mapper.convert_query_request(query)
       response = mapper.send_query(req)
       mapper.convert_query_response(response, query_result)
-      logging.error("Result: {0}".format(query_result))
       return
 
     result = self.__get_query_results(query)
@@ -2572,11 +2573,11 @@ class DatastoreDistributed():
     logging.info("Doing a rollback on transaction id {0} for app id {1}"
       .format(txn.handle(), app_id))
 
-    if app_id not in RESERVED_APP_IDS:
-      mapper = pb_mapper.PbMapper(app_id=app_id, dataset=app_id)
-      req = mapper.convert_rollback_request(txn)
-      response = mapper.send_rollback_request(req)
-      return (api_base_pb.VoidProto().Encode(), 0, "")
+    #if app_id not in RESERVED_APP_IDS:
+    #  mapper = pb_mapper.PbMapper(app_id=app_id, dataset=self.dataset_id)
+    #  req = mapper.convert_rollback_request(txn)
+    #  response = mapper.send_rollback_request(req)
+    #  return (api_base_pb.VoidProto().Encode(), 0, "")
 
     try:
       self.zookeeper.notify_failed_transaction(app_id, txn.handle())
@@ -2746,13 +2747,13 @@ class MainHandler(tornado.web.RequestHandler):
     begin_transaction_req_pb = datastore_pb.BeginTransactionRequest(
       http_request_data)
 
-    if app_id not in RESERVED_APP_IDS:
-      mapper = pb_mapper.PbMapper(app_id=app_id, dataset=app_id)
-      req = mapper.convert_begin_transaction_request(
-        begin_transaction_req_pb)
-      response = mapper.send_begin_transaction_request(req)
-      transaction_pb = mapper.convert_begin_transaction_response(response)
-      return (transaction_pb.Encode(), 0, "")
+    #if app_id not in RESERVED_APP_IDS:
+    #  mapper = pb_mapper.PbMapper(app_id=app_id, dataset=self.dataset_id)
+    #  req = mapper.convert_begin_transaction_request(
+    #    begin_transaction_req_pb)
+    #  response = mapper.send_begin_transaction_request(req)
+    #  transaction_pb = mapper.convert_begin_transaction_response(response)
+    #  return (transaction_pb.Encode(), 0, "")
 
     multiple_eg = False
     if begin_transaction_req_pb.has_allow_multiple_eg():
