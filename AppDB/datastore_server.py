@@ -45,6 +45,8 @@ from google.appengine.datastore import sortable_pb_encoder
 
 from google.appengine.runtime import apiproxy_errors
 
+from google.appengine.ext import db
+from google.appengine.ext.db.metadata import Namespace
 from google.appengine.ext.remote_api import remote_api_pb
 
 from M2Crypto import SSL
@@ -1710,7 +1712,18 @@ class DatastoreDistributed():
       elif op and op == datastore_pb.Query_Filter.LESS_THAN_OR_EQUAL:
         endrow = prefix + self._SEPARATOR + query.kind() + "!" + __key__ 
     return startrow, endrow, start_inclusive, end_inclusive
-   
+
+  def namespace_query(self):
+    """ Performs a metadata namespace query.
+ 
+    Returns:
+      A list of entity protos holding Namespace kinds.
+    """
+    #TODO implement where we return all active namespaces.
+    default_namespace = Namespace(id=1)
+    protobuf = db.model_to_protobuf(default_namespace)
+    return [protobuf.Encode()]
+
   def __kind_query(self, query, filter_info, order_info):
     """ Performs kind only queries, kind and ancestor, and ancestor queries
         https://developers.google.com/appengine/docs/python/datastore/queries.
@@ -1735,7 +1748,9 @@ class DatastoreDistributed():
       return self.ancestor_query(query, filter_info, order_info)
     elif not query.has_kind():
       return self.kindless_query(query, filter_info, order_info)
-    
+    elif query.kind() == "__namespace__":
+      return self.namespace_query()
+ 
     startrow, endrow, start_inclusive, end_inclusive = \
           self.kind_query_range(query, filter_info, order_info)
     if startrow == None or endrow == None:
@@ -2178,11 +2193,17 @@ class DatastoreDistributed():
           index_key = indexes.keys()[0]
           index_value = indexes[index_key]['reference']
           last_keys_of_scans[prop_name] = index_value
-      
-      # Purge keys which did not intersect from all equality filters:
+
+      # Purge keys which did not intersect from all equality filters. You 
+      # cannot loop on a dictionary and delete from it at the same time.
+      keys_to_delete = []
       for key in reference_counter_hash:
         if reference_counter_hash[key] != len(filter_info.keys()):
-          del reference_counter_hash[key]
+          keys_to_delete.append(key)
+
+      for key in keys_to_delete:
+        del reference_counter_hash[key]
+
 
       # We are looking for the earliest (alphabetically) of the keys.
       start_key = ""
