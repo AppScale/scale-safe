@@ -3097,7 +3097,8 @@ class Djinn
     GodInterface.start(:uaserver, start_cmd, stop_cmd, port, env_vars)
   end 
 
-  # Outputs Google Cloud Datastore credentials to the file system.
+  # Outputs Google Cloud Datastore credentials to the file system. All
+  # values are base64, and therefore need to be decoded.
   def write_gcd_creds_to_disk
     if !@creds["gcd_private_key"].nil?
       private_key_decoded = Base64.decode64(@creds["gcd_private_key"])
@@ -3106,18 +3107,18 @@ class Djinn
         |file| file.write(private_key_decoded + "\000") 
       }
     end
-
+    
     if !@creds["gcd_service_email"].nil?
       gcd_service_email = @creds["gcd_service_email"]
       File.open("/etc/appscale/gcd_service_email", "w"){ 
-        |file| file.write(gcd_service_email) 
+        |file| file.write(Base64.decode64(gcd_service_email))
       }
     end
 
     if !@creds["gcd_dataset_id"].nil?
       gcd_dataset_id = @creds["gcd_dataset_id"]
       File.open("/etc/appscale/gcd_dataset_id", "w"){ 
-        |file| file.write(gcd_dataset_id) 
+        |file| file.write(Base64.decode64(gcd_dataset_id))
       }
     end
   end
