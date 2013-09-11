@@ -1023,7 +1023,6 @@ class BaseCursor(object):
     # In order for Google Cloud Datastore to store its cursor and have 
     # backward compatibility, we remove this check.
     #assert len(compiled_cursor.position_list()) == 1
-
     position = compiled_cursor.position(0)
 
 
@@ -1068,7 +1067,6 @@ class BaseCursor(object):
           indexvalue.set_property(prop.name())
           indexvalue.mutable_value().CopyFrom(prop.value())
       position.set_start_inclusive(False)
-
 
 class IteratorCursor(BaseCursor):
   """A query cursor over an entity iterator."""

@@ -462,6 +462,11 @@ class DatastoreDistributed(apiproxy_stub.APIProxyStub):
       compiled_query = query_result.mutable_compiled_query()
       compiled_query.set_keys_only(query.keys_only())
       compiled_query.mutable_primaryscan().set_index_name(query.Encode())
+    # This if for GCD's compiled cursor, piggy backing our cursor.
+    if query_response.has_compiled_cursor():
+      new_position = query_result.mutable_compiled_cursor().add_position()
+      new_position.set_start_key(query_response.compiled_cursor().\
+        position_list()[0].start_key())
 
   def _Dynamic_Next(self, next_request, query_result):
     """Get the next set of entities from a previously run query. """

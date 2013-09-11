@@ -80,7 +80,6 @@ class PbMapper():
       self.__service_email = service_email
       self.__private_key = private_key
       self._set_environ()
-
     googledatastore.set_options(dataset=dataset)
 
   def _get_gcd_permissions(self):
@@ -586,13 +585,15 @@ class PbMapper():
     if request.has_limit():
       gcd_query.limit = request.limit()
 
-    if request.has_compiled_cursor():
+    if request.has_compiled_cursor() and len(request.compiled_cursor().\
+      position_list()) == 2:
       # We place the GCD cursor in the second position of the compiled
       # cursors. This gives us backward compatibility with AppScale.
       start_key = request.compiled_cursor().position_list()[1].start_key()
       gcd_query.start_cursor = start_key
 
-    if request.has_end_compiled_cursor():
+    if request.has_end_compiled_cursor() and len(request.end_compiled_cursor().\
+      position_list()) == 2:
       start_key = request.end_compiled_cursor().position_list()[1].start_key()
       gcd_query.end_cursor = start_key
 
@@ -771,7 +772,6 @@ class PbMapper():
       # Skip adding properties if its a keys only query.
       if not query_result.keys_only():
         self.add_properties_to_entity_pb(new_entity, entity_result.entity)
-
     return query_result
 
   def convert_allocate_id_request(self, request):

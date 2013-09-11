@@ -796,7 +796,9 @@ class ListCursor(BaseCursor):
       (cursor_entity, inclusive): a datastore_pb.EntityProto and if it should
       be included in the result set.
     """
-    assert len(compiled_cursor.position_list()) == 1
+    # This check is removed because GCD cursors piggback on our original 
+    # cursors.
+    #assert len(compiled_cursor.position_list()) == 1
 
     position = compiled_cursor.position(0)
     entity_as_pb = datastore_pb.EntityProto()
