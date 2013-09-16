@@ -39,6 +39,20 @@ class TestDjinn < Test::Unit::TestCase
     @app = "app"
   end
 
+  def test_write_gcd_creds_to_disk
+    creds = {"gcd_read_only" => "True", 
+             "gcd_private_key" => "some_file",
+             "gcd_service_email" => "a@a.com",
+             "gcd_dataset_id" => "some_id"}
+    file = flexmock(File)
+    file.should_receive(:open).and_return()
+    file.should_receive(:write).and_return()
+
+    djinn = Djinn.new
+    djinn.creds = creds
+    djinn.write_gcd_creds_to_disk
+  end
+
   # Every function that is accessible via SOAP should check for the secret
   # and return a certain message if a bad secret is given.
   def test_functions_w_bad_secret
