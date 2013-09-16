@@ -54,6 +54,11 @@ class APIProxyStub(object):
 
   _ACCEPTS_REQUEST_ID = False
 
+
+
+
+  THREADSAFE = False
+
   def __init__(self, service_name, max_request_size=MAX_REQUEST_SIZE,
                request_data=None):
     """Constructor.
@@ -82,7 +87,7 @@ class APIProxyStub(object):
     Returns:
       a instance of RPC.
     """
-    return apiproxy_rpc.RealRPC(stub=self)
+    return apiproxy_rpc.RPC(stub=self)
 
   def MakeSyncCall(self, service, call, request, response, request_id=None):
     """The main RPC entry point.

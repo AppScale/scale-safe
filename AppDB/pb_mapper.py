@@ -25,14 +25,18 @@ See https://developers.google.com/datastore/docs/apis/v1beta1/proto
 for mapping.
  
 """
-import googledatastore
-from google.appengine.datastore import datastore_pb
-from google.appengine.datastore.entity_pb import Property
-from google.appengine.runtime import apiproxy_errors
 import base64
+import googledatastore
 import logging
 import os
 import uuid
+
+from google.appengine.datastore import datastore_pb
+from google.appengine.datastore.entity_pb import Property
+from google.appengine.runtime import apiproxy_errors
+
+
+import httplib2
 
 class ValueType:
   """ Different supported types of values for entity properties. """
@@ -150,12 +154,18 @@ class PbMapper():
       A Google Cloud Datastore BlindWrite response.
     Raises:
       datastore_pb.Error.CAPABILTIY_DISABLED if in read only mode.
+      datastore_pb.Error.INTERNAL_ERROR if backend is not available.
     """
     if self.gcd_permissions == self.READ_ONLY:
       raise apiproxy_errors.ApplicationError(
         datastore_pb.Error.CAPABILITY_DISABLED, "In read only mode")
-    return googledatastore.blind_write(request)
-
+    try:
+      return googledatastore.blind_write(request)
+    except googledatastore.RPCError as rpc_error:
+      logging.exception(rpc_error)
+      raise apiproxy_errors.ApplicationError(
+        datastore_pb.Error.INTERNAL_ERROR, "{0}".format(
+        rpc_error))
   def set_properties(self, gcd_entity, property_list, is_raw=False):
     """ Sets the properties for a given Google Cloud Datastore entity. 
 
@@ -373,8 +383,16 @@ class PbMapper():
       request: A Google Cloud Datastore LookupRequest.
     Returns:
       A Google Cloud Datastore LookupResponse. 
+    Raises:
+      datastore_pb.Error.INTERNAL_ERROR if backend is not available.
     """
-    return googledatastore.lookup(request)
+    try:
+      return googledatastore.lookup(request)
+    except googledatastore.RPCError as rpc_error:
+      logging.exception(rpc_error)
+      raise apiproxy_errors.ApplicationError(
+        datastore_pb.Error.INTERNAL_ERROR, "{0}".format(
+        rpc_error))
 
   def convert_get_request(self, request):
     """ Converts a datastore_pb.GetRequest to a Google Cloud Datastore
@@ -499,8 +517,17 @@ class PbMapper():
       request: A googledatastore.BeginTransactionRequest.
     Returns:
       A googledatastore.BeginTransactionResponse.
+    Raises:
+      datastore_pb.Error.INTERNAL_ERROR if backend is not available.
     """
-    return googledatastore.begin_transaction(request)
+    try:
+      return googledatastore.begin_transaction(request)
+    except googledatastore.RPCError as rpc_error:
+      logging.exception(rpc_error)
+      error = json.loads(rpc_error)['error']['errors'][0]
+      raise apiproxy_errors.ApplicationError(
+        datastore_pb.Error.INTERNAL_ERROR, "{0}".format(
+        rpc_error))
 
   def convert_begin_transaction_response(self, response):
     """ Converts a Google Cloud Datastore begin response to a
@@ -532,8 +559,17 @@ class PbMapper():
 
     Args:
       request: A googledatastore.RollbackRequest.
+    Raises:
+      datastore_pb.Error.INTERNAL_ERROR if backend is not available.
     """
-    googledatastore.rollback(request)
+    try:
+      googledatastore.rollback(request)
+    except googledatastore.RPCError as rpc_error:
+      logging.exception(rpc_error)
+      error = json.loads(rpc_error)['error']['errors'][0]
+      raise apiproxy_errors.ApplicationError(
+        datastore_pb.Error.INTERNAL_ERROR, "{0}".format(
+        rpc_error))
 
   def fill_in_key(self, new_key, element_list):
     """ Fills in key with a path element list.
@@ -644,8 +680,17 @@ class PbMapper():
       request: A Google Cloud Datastore Query protocol buffer.
     Returns:
       A Google Cloud Datastore QueryResults protcol buffer.
+    Raises:
+      datastore_pb.Error.INTERNAL_ERROR if backend is not available.
     """
-    return googledatastore.run_query(request)
+    try:
+      return googledatastore.run_query(request)
+    except googledatastore.RPCError as rpc_error:
+      logging.exception(rpc_error)
+      error = json.loads(rpc_error)['error']['errors'][0]
+      raise apiproxy_errors.ApplicationError(
+        datastore_pb.Error.INTERNAL_ERROR, "{0}".format(
+        rpc_error))
 
   def add_properties_to_entity_pb(self, new_entity, gcd_entity):
     """ Adds a property to an entity object from a Google Cloud Datastore
@@ -837,5 +882,14 @@ class PbMapper():
       commit: A googledatastore.CommitRequest.
     Returns:
       A googledatastore.CommitResponse.
+    Raises:
+      datastore_pb.Error.INTERNAL_ERROR if backend is not available.
     """
-    return googledatastore.commit(commit)
+    try:
+      return googledatastore.commit(commit)
+    except googledatastore.RPCError as rpc_error:
+      logging.exception(rpc_error)
+      error = json.loads(rpc_error)['error']['errors'][0]
+      raise apiproxy_errors.ApplicationError(
+        datastore_pb.Error.INTERNAL_ERROR, "{0}".format(
+        rpc_error))

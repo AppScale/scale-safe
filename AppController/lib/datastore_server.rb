@@ -48,6 +48,9 @@ module DatastoreServer
   # Location of Google Cloud Datastore dataset ID.
   DATASET_ID_FILE = "/etc/appscale/gcd_dataset_id"
 
+  # Location of permission of read only mode for GCD.
+  READ_ONLY_MODE_FILE = "/etc/appscale/gcd_read_only"
+
   # We have two modes of operation for Google Cloud Datastore, 
   # read only mode and read/write mode.
   READ_ONLY = 'READ_ONLY'
@@ -60,6 +63,11 @@ module DatastoreServer
     ports = self.get_server_ports(table)
     email = HelperFunctions.read_file(SERVICE_ACCOUNT)
     dataset_id = HelperFunctions.read_file(DATASET_ID_FILE) 
+    is_gcd_read_only = HelperFunctions.read_file(READ_ONLY_MODE_FILE)
+    permission = READ_WRITE
+    if is_gcd_read_only == "True"
+      permission = READ_ONLY 
+    end
     env_vars = { 
       'APPSCALE_HOME' => APPSCALE_HOME,
       "MASTER_IP" => master_ip, 
@@ -67,7 +75,7 @@ module DatastoreServer
       "DATASET_ID" => dataset_id,
       "DATASTORE_SERVICE_ACCOUNT" => email, 
       "DATASTORE_PRIVATE_KEY_FILE" => PRIVATE_KEY_FILE,
-      "GCD_DB_PERMISSIONS" => READ_WRITE
+      "GCD_DB_PERMISSIONS" => permission
     }
   
     ports.each { |port|

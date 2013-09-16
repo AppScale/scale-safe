@@ -3100,6 +3100,12 @@ class Djinn
   # Outputs Google Cloud Datastore credentials to the file system. All
   # values are base64, and therefore need to be decoded.
   def write_gcd_creds_to_disk
+    if !@creds["gcd_read_only"].nil?
+      File.open("/etc/appscale/gcd_read_only", "w"){
+        |file| file.write(@creds["gcd_read_only"])
+      }
+    end
+
     if !@creds["gcd_private_key"].nil?
       private_key_decoded = Base64.decode64(@creds["gcd_private_key"])
       File.open("/etc/appscale/gcd_private.key", "w"){ 

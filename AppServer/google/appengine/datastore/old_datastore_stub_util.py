@@ -802,6 +802,9 @@ class ListCursor(BaseCursor):
 
     position = compiled_cursor.position(0)
     entity_as_pb = datastore_pb.EntityProto()
+    if position.start_key() == "\n\00":
+      return None, False
+
     (query_info_encoded, entity_encoded) = position.start_key().split(
         _CURSOR_CONCAT_STR, 1)
     query_info_pb = datastore_pb.Query()
