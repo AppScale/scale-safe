@@ -2873,6 +2873,7 @@ class MainHandler(tornado.web.RequestHandler):
               "Concurrent transaction exception on put.")
     except apiproxy_errors.ApplicationError, e:
       logging.error(str(e))
+      clone_qr_pb.set_more_results(False)
       return (clone_qr_pb.Encode(),
               e.application_error,
               e.error_detail)

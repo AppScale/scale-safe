@@ -524,10 +524,9 @@ class PbMapper():
       return googledatastore.begin_transaction(request)
     except googledatastore.RPCError as rpc_error:
       logging.exception(rpc_error)
-      error = json.loads(rpc_error)['error']['errors'][0]
       raise apiproxy_errors.ApplicationError(
         datastore_pb.Error.INTERNAL_ERROR, "{0}".format(
-        rpc_error))
+        str(rpc_error)))
 
   def convert_begin_transaction_response(self, response):
     """ Converts a Google Cloud Datastore begin response to a
@@ -566,10 +565,9 @@ class PbMapper():
       googledatastore.rollback(request)
     except googledatastore.RPCError as rpc_error:
       logging.exception(rpc_error)
-      error = json.loads(rpc_error)['error']['errors'][0]
       raise apiproxy_errors.ApplicationError(
         datastore_pb.Error.INTERNAL_ERROR, "{0}".format(
-        rpc_error))
+        str(rpc_error)))
 
   def fill_in_key(self, new_key, element_list):
     """ Fills in key with a path element list.
@@ -659,8 +657,8 @@ class PbMapper():
           element_list = value.referencevalue().pathelement_list()
           self.fill_in_key(prop_filter.value.key_value, element_list)
         else:
-          raise TypeError("Unable to get a value for property--wrong type") 
-   
+          prop_filter.value.string_value = ""
+
     # Put in ancestor filters if the query has an ancestor specified.
     if request.has_ancestor():
       ancestor_key = googledatastore.Key()
@@ -687,10 +685,9 @@ class PbMapper():
       return googledatastore.run_query(request)
     except googledatastore.RPCError as rpc_error:
       logging.exception(rpc_error)
-      error = json.loads(rpc_error)['error']['errors'][0]
       raise apiproxy_errors.ApplicationError(
         datastore_pb.Error.INTERNAL_ERROR, "{0}".format(
-        rpc_error))
+        str(rpc_error)))
 
   def add_properties_to_entity_pb(self, new_entity, gcd_entity):
     """ Adds a property to an entity object from a Google Cloud Datastore
@@ -889,7 +886,6 @@ class PbMapper():
       return googledatastore.commit(commit)
     except googledatastore.RPCError as rpc_error:
       logging.exception(rpc_error)
-      error = json.loads(rpc_error)['error']['errors'][0]
       raise apiproxy_errors.ApplicationError(
         datastore_pb.Error.INTERNAL_ERROR, "{0}".format(
-        rpc_error))
+        str(rpc_error)))
