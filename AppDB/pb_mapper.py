@@ -77,7 +77,7 @@ class PbMapper():
     """
     self.app_id = app_id
     self.gcd_permissions = self._get_gcd_permissions()
-     
+    logging.error("GCD Permissions: {0}".format(self.gcd_permissions)) 
     if service_email and private_key:
       logging.info("Service email set to: %s" % service_email)
       logging.info("Private key is at: %s" % private_key)
@@ -278,7 +278,8 @@ class PbMapper():
 
       else:
         # Create an empty value.
-        gcd_prop.value.add()
+        value = gcd_prop.value.add()
+        value.indexed = False
 
       if is_raw:
         value.indexed = False
