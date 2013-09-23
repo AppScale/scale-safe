@@ -31,6 +31,9 @@ case "$1" in
         installpycrypto
         installlxml
         installxmpppy
+        installphp
+	installappserverjava
+	postinstallappserverjava
 	installjavajdk
         installappserverjava
         postinstallappserverjava
@@ -96,6 +99,7 @@ case "$1" in
         installpycrypto
         installlxml
         installxmpppy
+        installphp
 	installjavajdk
         installappserverjava
         postinstallappserverjava
