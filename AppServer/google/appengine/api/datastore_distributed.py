@@ -252,14 +252,15 @@ class DatastoreDistributed(apiproxy_stub.APIProxyStub):
     """ Does Nothing   """
     return 
 
-  def MakeSyncCall(self, service, call, request, response):
+  def MakeSyncCall(self, service, call, request, response, request_id=None):
     """ The main RPC entry point. service must be 'datastore_v3'.
     """
     self.assertPbIsInitialized(request)
     super(DatastoreDistributed, self).MakeSyncCall(service,
                                                 call,
                                                 request,
-                                                response)
+                                                response,
+                                                request_id)
     self.assertPbIsInitialized(response)
 
   def assertPbIsInitialized(self, pb):
@@ -437,8 +438,6 @@ class DatastoreDistributed(apiproxy_stub.APIProxyStub):
         return cmp(x_type, y_type)
 
     results = query_response.result_list()
-    results = [datastore.Entity._FromPb(r) for r in results]
-    results = [r._ToPb() for r in results]
     for result in results:
       old_datastore_stub_util.PrepareSpecialPropertiesForLoad(result)
 
