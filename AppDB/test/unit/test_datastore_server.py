@@ -6,6 +6,9 @@ import sys
 import unittest
 from flexmock import flexmock
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../../lib"))  
+import appscale_info
+
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../../AppServer"))  
 from google.appengine.datastore import entity_pb
 from google.appengine.datastore import datastore_index
@@ -32,6 +35,10 @@ class TestDatastoreServer(unittest.TestCase):
   """
   A set of test cases for the datastore server (datastore server v2)
   """
+  def setUp(self):
+    info = flexmock(appscale_info)
+    info.should_receive("get_gcd_dataset_id").and_return("some-id")
+
   def get_zookeeper(self):
     zookeeper = flexmock()
     zookeeper.should_receive("acquire_lock").and_return(True)
@@ -649,6 +656,7 @@ class TestDatastoreServer(unittest.TestCase):
     db_batch.should_receive("batch_get_entity").and_return(None)
 
     query = datastore_pb.Query()
+    query.set_app("apichecker")
     dd = DatastoreDistributed(db_batch, zookeeper) 
     self.assertEquals(dd.is_zigzag_merge_join(query, [], []), False)
     filter_info = {"prop1":[(datastore_pb.Query_Filter.EQUAL, "1")],
