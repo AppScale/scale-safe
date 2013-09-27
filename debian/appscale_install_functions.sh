@@ -638,8 +638,8 @@ installsimplejson()
   cd simplejson-${SIMPLE_JSON_VERSION}
   python setup.py install  
   cd ..
-  rm -fdr simplejson-${SIMPLE_JSON_VERSION}.tar.gz
-  rm -fdr simplejson-${SIMPLE_JSON_VERSION}
+  rm -fr simplejson-${SIMPLE_JSON_VERSION}.tar.gz
+  rm -fr simplejson-${SIMPLE_JSON_VERSION}
 }
 
 installrabbitmq()
