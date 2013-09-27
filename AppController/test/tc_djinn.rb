@@ -1314,7 +1314,7 @@ class TestDjinn < Test::Unit::TestCase
     }
 
     expected = "Error: Port in use by nginx for app another-app"
-    assert_equal(expected, djinn.relocate_app('myapp', 80, 444, @secret))
+    assert_equal(expected, djinn.relocate_app('myapp', 80, 4380, @secret))
   end
 
 
@@ -1333,7 +1333,7 @@ class TestDjinn < Test::Unit::TestCase
     }
 
     expected = "Error: Port in use by nginx for app another-app"
-    assert_equal(expected, djinn.relocate_app('myapp', 81, 443, @secret))
+    assert_equal(expected, djinn.relocate_app('myapp', 8080, 443, @secret))
   end
 
 
@@ -1346,13 +1346,13 @@ class TestDjinn < Test::Unit::TestCase
       'another-app' => {
         'nginx' => 80,
         'nginx_https' => 443,
-        'haproxy' => 10000,
+        'haproxy' => 4380,
         'appengine' => [20000]
       }
     }
 
     expected = "Error: Port in use by haproxy for app another-app"
-    assert_equal(expected, djinn.relocate_app('myapp', 81, 10000, @secret))
+    assert_equal(expected, djinn.relocate_app('myapp', 8080, 4380, @secret))
   end
 
 
@@ -1366,12 +1366,12 @@ class TestDjinn < Test::Unit::TestCase
         'nginx' => 80,
         'nginx_https' => 443,
         'haproxy' => 10000,
-        'appengine' => [20000]
+        'appengine' => [8080]
       }
     }
 
     expected = "Error: Port in use by AppServer for app another-app"
-    assert_equal(expected, djinn.relocate_app('myapp', 20000, 444, @secret))
+    assert_equal(expected, djinn.relocate_app('myapp', 8080, 4380, @secret))
   end
 
 

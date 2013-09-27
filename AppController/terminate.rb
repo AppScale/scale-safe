@@ -59,6 +59,8 @@ module TerminateHelper
     `rm -rf /opt/appscale/cassandra`
     `rm -rf /opt/appscale/zookeeper`
     `rm -rf /opt/appscale/apps`
+    `rm -f /opt/appscale/appcontroller-state.json`
+    `rm -f /opt/appscale/appserver-state.json`
   end
 
 
